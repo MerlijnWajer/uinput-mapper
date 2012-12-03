@@ -174,7 +174,8 @@ int main(int argc, char** argv) {
         nowrite = 0;
         j = 0;
 
-        if (e.type == EV_KEY) {
+        /* Only catch keys and ignore auto-repeat (value == 2) */
+        if (e.type == EV_KEY && e.value != 2) {
             switch(e.code) {
             case KEY_UP:
                 je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = -e.value; j = 0; break;
