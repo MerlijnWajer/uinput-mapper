@@ -102,6 +102,10 @@ int main(int argc, char** argv) {
         return 1;
     }
 
+
+    /* Memset because we are already setting the absmax/absmin */
+    memset(&uidev, '\0', sizeof(struct uinput_user_dev));
+
     for(j = 0; j < 2; j++) {
         js[j] = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
         if (js[j] < 0) {
@@ -143,7 +147,6 @@ int main(int argc, char** argv) {
 
 
         /* Allocate device info */
-        memset(&uidev, '\0', sizeof(struct uinput_user_dev));
         snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:1");
 
         uidev.id.bustype = BUS_USB;
