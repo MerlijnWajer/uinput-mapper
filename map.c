@@ -85,6 +85,7 @@ int main(int argc, char** argv) {
     };
 
     int evkeys[] = {
+        BTN_JOYSTICK,
         BTN_0,
         BTN_1,
         BTN_2,
