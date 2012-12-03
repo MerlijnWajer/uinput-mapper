@@ -4,8 +4,6 @@
  * - Can map keys from some keyboard to keys on a joystick.
  *
  * Does not:
- * - Show up as a joystick device?
- * - Emulate multiple joysticks
  * - Have a nice mapping file format / datastructures YET.
  *
  */
@@ -55,7 +53,6 @@ static int get_key_num(char* name)
 static int js[2];
 
 /* TODO:
- * - Use atexit() to free joysticks
  * - Add file parsing / reading
  * - Add proper datastructures to keep track
  */
