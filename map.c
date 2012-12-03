@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include <time.h>
+#include <signal.h>
 
 #include <linux/input.h>
 #include <linux/uinput.h>
@@ -52,6 +52,7 @@ static int get_key_num(char* name)
     return -1;
 }
 
+static int js[2];
 
 /* TODO:
  * - Use atexit() to free joysticks
@@ -59,24 +60,23 @@ static int get_key_num(char* name)
  * - Add proper datastructures to keep track
  */
 
+void free_js(int sig) {
+    int j;
+    for(j = 0; j < 2; j++) {
+        printf("Freeing joystick: %d\n", j);
+        if (ioctl(js[j], UI_DEV_DESTROY) < 0) {
+            perror("Error freeing joystick");
+        }
+        close(js[j]);
+    }
+    exit(1);
+}
+
 int main(int argc, char** argv) {
-    int i, nowrite;
-    int in, uin; /* fds */
+    int i, j, nowrite;
+    int in; /* fds */
     struct input_event e, je;
     struct uinput_user_dev uidev;
-
-    /*
-     * KEY_LEFT -> ABS_HAT0X
-     * KEY_RIGHT -> ABS_HAT0X
-     * KEY_UP -> ABS_HAT0Y
-     * KEY_DOWN -> ABS_HAT0Y
-     *
-     * KEY_LEFTCTRL -> BTN_0
-     * KEY_LEFTALT -> BTN_1
-     * KEY_SPACE -> BTN_2
-     *
-     * KEY_1 -> BTN_3
-     */
 
     int abskeyevs[] = {
         ABS_HAT0X,
@@ -85,13 +85,18 @@ int main(int argc, char** argv) {
     };
 
     int evkeys[] = {
-        BTN_JOYSTICK,
+        BTN_JOYSTICK, /* We need this to show up as Joystick */
         BTN_0,
         BTN_1,
         BTN_2,
         BTN_3,
         0
     };
+
+    if(signal(SIGINT, free_js)) {
+        printf("Atexit registration failed\n");
+        return 1;
+    }
 
     /* Open input and uinput */
     in = open(INPUT_PATH, O_RDONLY);
@@ -100,60 +105,62 @@ int main(int argc, char** argv) {
         return 1;
     }
 
-    uin = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
-    if (uin < 0) {
-        perror("open uin");
-        return 2;
-    }
-
-    /* Register device opts */
-    if (ioctl(uin, UI_SET_EVBIT, EV_ABS) < 0) {
-        perror("ioctl EV_ABS");
-        return 1;
-    }
-
-    if (ioctl(uin, UI_SET_EVBIT, EV_KEY) < 0) {
-        perror("ioctl EV_KEY");
-        return 1;
-    }
-
-    /* Every ``button'' needs to be registered */
-    i = 0;
-    while(abskeyevs[i] != 0) {
-        if (ioctl(uin, UI_SET_ABSBIT, abskeyevs[i]) < 0) {
-            perror("ioctl dynamic");
+    for(j = 0; j < 2; j++) {
+        js[j] = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
+        if (js[j] < 0) {
+            perror("open js[j]");
             return 1;
         }
-        i++;
-    }
 
-    i = 0;
-    while(evkeys[i] != 0) {
-        if (ioctl(uin, UI_SET_KEYBIT, evkeys[i]) < 0) {
-            perror("ioctl dynamic 2");
+        /* Register device opts */
+        if (ioctl(js[j], UI_SET_EVBIT, EV_ABS) < 0) {
+            perror("ioctl EV_ABS");
             return 1;
         }
-        i++;
-    }
+
+        if (ioctl(js[j], UI_SET_EVBIT, EV_KEY) < 0) {
+            perror("ioctl EV_KEY");
+            return 1;
+        }
+
+        /* Every ``button'' needs to be registered */
+        i = 0;
+        while(abskeyevs[i] != 0) {
+            if (ioctl(js[j], UI_SET_ABSBIT, abskeyevs[i]) < 0) {
+                perror("ioctl dynamic");
+                return 1;
+            }
+            i++;
+        }
+
+        i = 0;
+        while(evkeys[i] != 0) {
+            if (ioctl(js[j], UI_SET_KEYBIT, evkeys[i]) < 0) {
+                perror("ioctl dynamic 2");
+                return 1;
+            }
+            i++;
+        }
 
 
-    /* Allocate device info */
-    memset(&uidev, '\0', sizeof(struct uinput_user_dev));
-    snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:1");
+        /* Allocate device info */
+        memset(&uidev, '\0', sizeof(struct uinput_user_dev));
+        snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:1");
 
-    uidev.id.bustype = BUS_USB;
-    uidev.id.vendor  = 0x42;
-    uidev.id.product = 0xbebe;
-    uidev.id.version = 1;
+        uidev.id.bustype = BUS_USB;
+        uidev.id.vendor  = 0x42;
+        uidev.id.product = 0xbebe;
+        uidev.id.version = 1;
 
-    if (write(uin, &uidev, sizeof(uidev)) < 0) {
-        perror("write");
-        return -1;
-    }
+        if (write(js[j], &uidev, sizeof(uidev)) < 0) {
+            perror("write");
+            return -1;
+        }
 
-    if (ioctl(uin, UI_DEV_CREATE)) {
-        perror("ioctl create");
-        return 1;
+        if (ioctl(js[j], UI_DEV_CREATE)) {
+            perror("ioctl create");
+            return 1;
+        }
     }
 
     /* Do it! */
@@ -165,30 +172,47 @@ int main(int argc, char** argv) {
 
         memset(&je, '\0', sizeof(struct input_event));
         nowrite = 0;
+        j = 0;
 
         if (e.type == EV_KEY) {
             switch(e.code) {
             case KEY_UP:
-                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = -e.value; break;
+                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = -e.value; j = 0; break;
             case KEY_DOWN:
-                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = e.value; break;
+                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = e.value; j = 0; break;
             case KEY_LEFT:
-                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = -e.value; break;
+                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = -e.value; j = 0; break;
             case KEY_RIGHT:
-                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = e.value; break;
+                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = e.value; j = 0; break;
             case KEY_LEFTCTRL:
-                je.type = EV_KEY; je.code = BTN_0; je.value = e.value; break;
+                je.type = EV_KEY; je.code = BTN_0; je.value = e.value; j = 0; break;
             case KEY_LEFTALT:
-                je.type = EV_KEY; je.code = BTN_1; je.value = e.value; break;
+                je.type = EV_KEY; je.code = BTN_1; je.value = e.value; j = 0; break;
             case KEY_SPACE:
-                je.type = EV_KEY; je.code = BTN_2; je.value = e.value; break;
+                je.type = EV_KEY; je.code = BTN_2; je.value = e.value; j = 0; break;
             case KEY_1:
-                je.type = EV_KEY; je.code = BTN_3; je.value = e.value; break;
+                je.type = EV_KEY; je.code = BTN_3; je.value = e.value; j = 0; break;
+            case KEY_R:
+                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = -e.value; j = 1; break;
+            case KEY_F:
+                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = e.value; j = 1; break;
+            case KEY_D:
+                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = -e.value; j = 1; break;
+            case KEY_G:
+                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = e.value; j = 1; break;
+            case KEY_A:
+                je.type = EV_KEY; je.code = BTN_0; je.value = e.value; j = 1; break;
+            case KEY_S:
+                je.type = EV_KEY; je.code = BTN_1; je.value = e.value; j = 1; break;
+            case KEY_Q:
+                je.type = EV_KEY; je.code = BTN_2; je.value = e.value; j = 1; break;
+            case KEY_2:
+                je.type = EV_KEY; je.code = BTN_3; je.value = e.value; j = 1; break;
             default:
                 nowrite = 1;
             }
             if (nowrite == 0) {
-                if(write(uin, &je, sizeof(struct input_event)) < 0) {
+                if(write(js[j], &je, sizeof(struct input_event)) < 0) {
                     perror("EV_ABS Write event");
                     return -1;
                 }
@@ -204,7 +228,7 @@ int main(int argc, char** argv) {
             je.code = 0;
             je.value = 0;
 
-            if (write(uin, &je, sizeof(struct input_event)) < 0) {
+            if (write(js[j], &je, sizeof(struct input_event)) < 0) {
                 perror("SYN write event");
                 return -1;
             }
