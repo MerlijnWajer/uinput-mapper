@@ -160,6 +160,7 @@ int main(int argc, char** argv) {
                 nowrite = 1;
             }
             if (nowrite == 0) {
+                printf("Writing %d to %d\n", e.code, j);
                 if(write(js[j], &je, sizeof(struct input_event)) < 0) {
                     perror("EV_ABS Write event");
                     return -1;
