@@ -1,1 +1,6 @@
 uinput-mapper maps input devices to new virtual input devices.
+
+Work in progress, but we are getting a point where it is starting to be
+useful.
+
+See confs/techinc-arcade.h for an example config.
