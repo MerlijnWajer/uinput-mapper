@@ -7,6 +7,7 @@
 /* Set up event to read from */
 #define INPUT_PATH "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
 
+#endif
 
 /* Now follows keymapping, do not touch ifdef */
 #ifdef H_IN_CASE
@@ -51,4 +52,3 @@ KEYMAP(KEY_Q, BTN_2, EV_KEY, 1, )
 KEYMAP(KEY_2, BTN_3, EV_KEY, 1,)
 #endif
 
-#endif
