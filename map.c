@@ -21,7 +21,7 @@
 #include <linux/input.h>
 #include <linux/uinput.h>
 
-#include "custom_map.h"
+#include "config.h"
 
 #define UINPUT_PATH "/dev/uinput"
 
@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
         }
 
         #define H_CONFIGURE_JOYSTICKS
-        #include "custom_map.h"
+        #include "config.h"
 
         /* Allocate device info */
         snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:%d", j);
@@ -143,7 +143,7 @@ int main(int argc, char** argv) {
             switch(e.code) {
 
             #define H_JOYMAP
-            #include "custom_map.h"
+            #include "config.h"
 
             default:
                 nowrite = 1;
