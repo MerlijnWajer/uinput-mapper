@@ -104,17 +104,6 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        /* Register device opts */
-        if (ioctl(js[j], UI_SET_EVBIT, EV_ABS) < 0) {
-            perror("ioctl EV_ABS");
-            return 1;
-        }
-
-        if (ioctl(js[j], UI_SET_EVBIT, EV_KEY) < 0) {
-            perror("ioctl EV_KEY");
-            return 1;
-        }
-
         #define H_CONFIGURE_JOYSTICKS
         #include "custom_map.h"
 
