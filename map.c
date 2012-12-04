@@ -21,8 +21,8 @@
 #include <linux/input.h>
 #include <linux/uinput.h>
 
-#define INPUT_PATH "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
-/*#define INPUT_PATH "/dev/input/by-path/platform-i8042-serio-0-event-kbd"*/
+#include "custom_map.h"
+
 #define UINPUT_PATH "/dev/uinput"
 
 /* Reverse mapping, for later use */
@@ -50,7 +50,7 @@ static int get_key_num(char* name)
     return -1;
 }
 
-static int js[2];
+static int js[JOYCOUNT];
 
 /* TODO:
  * - Add file parsing / reading
@@ -59,7 +59,7 @@ static int js[2];
 
 void free_js(int sig) {
     int j;
-    for(j = 0; j < 2; j++) {
+    for(j = 0; j < JOYCOUNT; j++) {
         printf("Freeing joystick: %d\n", j);
         if (ioctl(js[j], UI_DEV_DESTROY) < 0) {
             perror("Error freeing joystick");
@@ -103,8 +103,7 @@ int main(int argc, char** argv) {
     }
 
 
-
-    for(j = 0; j < 2; j++) {
+    for(j = 0; j < JOYCOUNT; j++) {
         /* Memset because we are already setting the absmax/absmin */
         memset(&uidev, '\0', sizeof(struct uinput_user_dev));
         js[j] = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
@@ -147,7 +146,7 @@ int main(int argc, char** argv) {
 
 
         /* Allocate device info */
-        snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:1");
+        snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:%d", j);
 
         uidev.id.bustype = BUS_USB;
         uidev.id.vendor  = 0x42;
@@ -181,6 +180,7 @@ int main(int argc, char** argv) {
         if (e.type == EV_KEY && e.value != 2) {
             switch(e.code) {
 
+            #define H_IN_CASE
             #include "custom_map.h"
 
             default:

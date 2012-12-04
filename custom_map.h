@@ -1,3 +1,15 @@
+#ifndef H_GLOBAL_MAP
+#define H_GLOBAL_MAP
+
+/* Set up amount of joysticks here */
+#define JOYCOUNT 2
+
+/* Set up event to read from */
+#define INPUT_PATH "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
+
+
+/* Now follows keymapping, do not touch ifdef */
+#ifdef H_IN_CASE
 #define KEYMAP(in_key, out_key, out_type, device, val) \
     case in_key: \
         je.type = out_type; \
@@ -37,3 +49,6 @@ KEYMAP(KEY_Q, BTN_2, EV_KEY, 1, )
 
 /* Yellow button */
 KEYMAP(KEY_2, BTN_3, EV_KEY, 1,)
+#endif
+
+#endif
