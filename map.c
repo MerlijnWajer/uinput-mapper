@@ -59,6 +59,8 @@ static int js[JOYCOUNT];
 
 void free_js(int sig) {
     int j;
+
+    (void) sig;
     for(j = 0; j < JOYCOUNT; j++) {
         printf("Freeing joystick: %d\n", j);
         if (ioctl(js[j], UI_DEV_DESTROY) < 0) {
@@ -89,6 +91,11 @@ int main(int argc, char** argv) {
         BTN_3,
         0
     };
+
+    (void)argc;
+    (void)argv;
+
+    (void)get_key_num;
 
     if(signal(SIGINT, free_js)) {
         printf("Atexit registration failed\n");
