@@ -176,41 +176,13 @@ int main(int argc, char** argv) {
         nowrite = 0;
         j = 0;
 
+
         /* Only catch keys and ignore auto-repeat (value == 2) */
         if (e.type == EV_KEY && e.value != 2) {
             switch(e.code) {
-            case KEY_UP:
-                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = -e.value; j = 0; break;
-            case KEY_DOWN:
-                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = e.value; j = 0; break;
-            case KEY_LEFT:
-                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = -e.value; j = 0; break;
-            case KEY_RIGHT:
-                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = e.value; j = 0; break;
-            case KEY_LEFTCTRL:
-                je.type = EV_KEY; je.code = BTN_0; je.value = e.value; j = 0; break;
-            case KEY_LEFTALT:
-                je.type = EV_KEY; je.code = BTN_1; je.value = e.value; j = 0; break;
-            case KEY_SPACE:
-                je.type = EV_KEY; je.code = BTN_2; je.value = e.value; j = 0; break;
-            case KEY_1:
-                je.type = EV_KEY; je.code = BTN_3; je.value = e.value; j = 0; break;
-            case KEY_R:
-                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = -e.value; j = 1; break;
-            case KEY_F:
-                je.type = EV_ABS; je.code = ABS_HAT0Y; je.value = e.value; j = 1; break;
-            case KEY_D:
-                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = -e.value; j = 1; break;
-            case KEY_G:
-                je.type = EV_ABS; je.code = ABS_HAT0X; je.value = e.value; j = 1; break;
-            case KEY_A:
-                je.type = EV_KEY; je.code = BTN_0; je.value = e.value; j = 1; break;
-            case KEY_S:
-                je.type = EV_KEY; je.code = BTN_1; je.value = e.value; j = 1; break;
-            case KEY_Q:
-                je.type = EV_KEY; je.code = BTN_2; je.value = e.value; j = 1; break;
-            case KEY_2:
-                je.type = EV_KEY; je.code = BTN_3; je.value = e.value; j = 1; break;
+
+            #include "custom_map.h"
+
             default:
                 nowrite = 1;
             }
