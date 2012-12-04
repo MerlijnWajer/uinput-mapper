@@ -72,25 +72,11 @@ void free_js(int sig) {
 }
 
 int main(int argc, char** argv) {
-    int i, j, nowrite;
+    int j, nowrite;
     int in; /* fds */
     struct input_event e, je;
     struct uinput_user_dev uidev;
 
-    int abskeyevs[] = {
-        ABS_HAT0X,
-        ABS_HAT0Y,
-        0
-    };
-
-    int evkeys[] = {
-        BTN_JOYSTICK, /* We need this to show up as Joystick */
-        BTN_0,
-        BTN_1,
-        BTN_2,
-        BTN_3,
-        0
-    };
 
     (void)argc;
     (void)argv;
@@ -108,7 +94,6 @@ int main(int argc, char** argv) {
         perror("open in");
         return 1;
     }
-
 
     for(j = 0; j < JOYCOUNT; j++) {
         /* Memset because we are already setting the absmax/absmin */
@@ -130,27 +115,8 @@ int main(int argc, char** argv) {
             return 1;
         }
 
-        /* Every ``button'' needs to be registered */
-        i = 0;
-        while(abskeyevs[i] != 0) {
-            if (ioctl(js[j], UI_SET_ABSBIT, abskeyevs[i]) < 0) {
-                perror("ioctl dynamic");
-                return 1;
-            }
-            uidev.absmax[abskeyevs[i]] = 1;
-            uidev.absmin[abskeyevs[i]] = -1;
-            i++;
-        }
-
-        i = 0;
-        while(evkeys[i] != 0) {
-            if (ioctl(js[j], UI_SET_KEYBIT, evkeys[i]) < 0) {
-                perror("ioctl dynamic 2");
-                return 1;
-            }
-            i++;
-        }
-
+        #define H_CONFIGURE_JOYSTICKS
+        #include "custom_map.h"
 
         /* Allocate device info */
         snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:%d", j);

@@ -9,6 +9,48 @@
 
 #endif
 
+
+#ifdef H_CONFIGURE_JOYSTICKS
+#ifndef H_CONFIGURE_JOYSTICKS_SEEN
+#define H_CONFIGURE_JOYSTICKS_SEEN
+
+#define JOYSTICK_ADD_KEY(key, bit, device) \
+    printf("JOYSTICK_ADD_KEY for device %d, key %s, bit: %s\n", device, #key, #bit); \
+    if(device == j && ioctl(js[device], bit, key) < 0) { \
+        perror("Error in JOYSTICK_ADD_KEY"); \
+        fprintf(stderr, "ERROR: JOYSTICK_ADD_KEY for device %d, key %s, bit: %s\n", device, #key, #bit); \
+        return 1; \
+    }
+
+#define JOYSTICK_SET_LIM(lim, val, key) \
+    uidev.lim[key] = val;
+
+/* Configure first joystick */
+JOYSTICK_ADD_KEY(ABS_HAT0X, UI_SET_ABSBIT, 0)
+JOYSTICK_SET_LIM(absmax, 1, ABS_HAT0X)
+JOYSTICK_SET_LIM(absmin, -1, ABS_HAT0X)
+
+JOYSTICK_ADD_KEY(ABS_HAT0Y, UI_SET_ABSBIT, 0)
+JOYSTICK_SET_LIM(absmax, 1, ABS_HAT0Y)
+JOYSTICK_SET_LIM(absmin, -1, ABS_HAT0Y)
+
+JOYSTICK_ADD_KEY(BTN_JOYSTICK, UI_SET_KEYBIT, 0)
+JOYSTICK_ADD_KEY(BTN_0, UI_SET_KEYBIT, 0)
+JOYSTICK_ADD_KEY(BTN_1, UI_SET_KEYBIT, 0)
+JOYSTICK_ADD_KEY(BTN_2, UI_SET_KEYBIT, 0)
+JOYSTICK_ADD_KEY(BTN_3, UI_SET_KEYBIT, 0)
+
+JOYSTICK_ADD_KEY(ABS_HAT0X, UI_SET_ABSBIT, 1)
+JOYSTICK_ADD_KEY(ABS_HAT0Y, UI_SET_ABSBIT, 1)
+
+JOYSTICK_ADD_KEY(BTN_JOYSTICK, UI_SET_KEYBIT, 1)
+JOYSTICK_ADD_KEY(BTN_0, UI_SET_KEYBIT, 1)
+JOYSTICK_ADD_KEY(BTN_1, UI_SET_KEYBIT, 1)
+JOYSTICK_ADD_KEY(BTN_2, UI_SET_KEYBIT, 1)
+JOYSTICK_ADD_KEY(BTN_3, UI_SET_KEYBIT, 1)
+#endif
+#endif
+
 /* Now follows keymapping, do not touch ifdef */
 #ifdef H_IN_CASE
 #define KEYMAP(in_key, out_key, out_type, device, val) \
