@@ -7,7 +7,7 @@ CFLAGS+=-D_BSD_SOURCE
 default: map
 
 keys:
-	bash genkeys.sh
+	echo '#include <linux/input.h>' | gcc -E -dM - | grep '#define KEY_' | cut -f2 -d" " | sed 's/KEY_.*/DEF_KEY(&)/' > def_keys.h
 
 map: map.c keys
 	$(CC) map.c $(CFLAGS) -o map
