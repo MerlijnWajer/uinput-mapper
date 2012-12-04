@@ -131,8 +131,8 @@ int main(int argc, char** argv) {
                 perror("ioctl dynamic");
                 return 1;
             }
-            uidev.absmax[i] = 1;
-            uidev.absmin[i] = -1;
+            uidev.absmax[abskeyevs[i]] = 1;
+            uidev.absmin[abskeyevs[i]] = -1;
             i++;
         }
 
