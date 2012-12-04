@@ -148,12 +148,12 @@ int main(int argc, char** argv) {
         nowrite = 0;
         j = 0;
 
-
         /* Only catch keys and ignore auto-repeat (value == 2) */
+        /* TODO: Remove this EV_KEY contraint and use it in the macro */
         if (e.type == EV_KEY && e.value != 2) {
             switch(e.code) {
 
-            #define H_IN_CASE
+            #define H_JOYMAP
             #include "custom_map.h"
 
             default:

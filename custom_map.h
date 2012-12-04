@@ -1,3 +1,52 @@
+/*
+ * Copyright Merlijn Wajer 2012
+ *
+ * This is the uinput-mapper configuration file.
+ *
+ * We are still working out all the details, but it basically boils down to the
+ * following: You write the configuration entirely in the C preprocessor by
+ * adding the right commands (macros) to the right sections.
+ *
+ *
+ * As of now, there are three sections:
+ *
+ * - GLOBAL_MAP;
+ *   This is where you set the amount of devices to be emulated (currently
+ *   called JOYCOUNT) and the INPUT_PATH.
+ *
+ * - CONFIGURE_JOYSTICKS:
+ *   This is where you tell uinput-mapper what buttons your new joysticks (or
+ *   other devices) should expose. Any button not exposed here will never be
+ *   send.
+ *
+ *   Macros that make sense to use here:
+ *   - JOYSTICK_ADD_KEY(<key>, <bit to set>, <device>)
+ *   - JOYSTICK_SET_LIM(<absmin|absmax>, <value>, <key>)
+ *
+ *   JOYSTICK_SET_LIM is mostly used for ABS_HATs.
+ *
+ * - JOYMAP:
+ *
+ *   Set the key mappings here.
+ *
+ *   Macros that make sense here:
+ *   - KEYMAP(<in_key>, <out_key>, <out_type>, <device>, <val>)
+ *
+ * ----------------------------------------------------------------------------
+ *
+ * TODO:
+ * - For KEYMAPs, add parameter that species the INPUT_PATH to map from
+ * - Add support for multiple INPUT_PATH
+ * - Figure out more details. There's probably a lot missing.
+ * - Remove EV_KEY constraint in map.c and use it as arg to KEY_MAP
+ *
+ * ----------------------------------------------------------------------------
+ */
+
+/* -------------------------------------------------------------------------- */
+/* ----------------------------- FIRST SECTION ----------------------------- */
+/* -------------------------------------------------------------------------- */
+
 #ifndef H_GLOBAL_MAP
 #define H_GLOBAL_MAP
 
@@ -9,6 +58,9 @@
 
 #endif
 
+/* -------------------------------------------------------------------------- */
+/* ----------------------------- SECOND SECTION ----------------------------- */
+/* -------------------------------------------------------------------------- */
 
 #ifdef H_CONFIGURE_JOYSTICKS
 #ifndef H_CONFIGURE_JOYSTICKS_SEEN
@@ -35,8 +87,7 @@
  * If a key is not enabled here, it will never be passed.
  */
 
-/* Hats.
- *
+/* Hats:
  * We set the absmax and absmin; otherwise the hats make no sense.
  */
 JOYSTICK_ADD_KEY(ABS_HAT0X, UI_SET_ABSBIT, 0)
@@ -46,8 +97,10 @@ JOYSTICK_ADD_KEY(ABS_HAT0Y, UI_SET_ABSBIT, 0)
 JOYSTICK_SET_LIM(absmax, 1, ABS_HAT0Y)
 JOYSTICK_SET_LIM(absmin, -1, ABS_HAT0Y)
 
-/* Buttons. */
+/* XXX: ALWAYS SET BTN_JOYSTICK TO EXPOSE A JOYSTICK EVENT */
 JOYSTICK_ADD_KEY(BTN_JOYSTICK, UI_SET_KEYBIT, 0)
+
+/* Buttons. */
 JOYSTICK_ADD_KEY(BTN_0, UI_SET_KEYBIT, 0)
 JOYSTICK_ADD_KEY(BTN_1, UI_SET_KEYBIT, 0)
 JOYSTICK_ADD_KEY(BTN_2, UI_SET_KEYBIT, 0)
@@ -63,6 +116,7 @@ JOYSTICK_SET_LIM(absmax, 1, ABS_HAT0X)
 JOYSTICK_SET_LIM(absmin, -1, ABS_HAT0X)
 
 JOYSTICK_ADD_KEY(BTN_JOYSTICK, UI_SET_KEYBIT, 1)
+
 JOYSTICK_ADD_KEY(BTN_0, UI_SET_KEYBIT, 1)
 JOYSTICK_ADD_KEY(BTN_1, UI_SET_KEYBIT, 1)
 JOYSTICK_ADD_KEY(BTN_2, UI_SET_KEYBIT, 1)
@@ -70,10 +124,13 @@ JOYSTICK_ADD_KEY(BTN_3, UI_SET_KEYBIT, 1)
 #endif
 #endif
 
-/* Now follows keymapping, do not touch ifdef */
-#ifdef H_IN_CASE
-#ifndef H_IN_CASE_SEEN
-#define H_IN_CASE_SEEN
+/* -------------------------------------------------------------------------- */
+/* ----------------------------- THIRD SECTION ----------------------------- */
+/* -------------------------------------------------------------------------- */
+
+#ifdef H_JOYMAP
+#ifndef H_JOYMAP_SEEN
+#define H_JOYMAP_SEEN
 #define KEYMAP(in_key, out_key, out_type, device, val) \
     case in_key: \
         je.type = out_type; \
@@ -113,5 +170,6 @@ KEYMAP(KEY_Q, BTN_2, EV_KEY, 1, +)
 
 /* Yellow button */
 KEYMAP(KEY_2, BTN_3, EV_KEY, 1, +)
+
 #endif
 #endif
