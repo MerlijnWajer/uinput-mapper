@@ -2,9 +2,13 @@
  * Status:
  *
  * - Can map keys from some keyboard to keys on a joystick.
+ * - Has programmable config format (see config.h)
  *
- * Does not:
- * - Have a nice mapping file format / datastructures YET.
+ * TODO:
+ * - Allow multiple keymaps per input key event; currently we override previous
+ *   values.
+ * - Allow multiple inputs, modify config file to allow for mapping from
+ *   specific inputs.
  *
  */
 
@@ -52,11 +56,6 @@ static int get_key_num(char* name)
 
 static int js[JOYCOUNT];
 
-/* TODO:
- * - Add file parsing / reading
- * - Add proper datastructures to keep track
- */
-
 void free_js(int sig) {
     int j;
 
@@ -84,14 +83,14 @@ int main(int argc, char** argv) {
     (void)get_key_num;
 
     if(signal(SIGINT, free_js)) {
-        printf("Atexit registration failed\n");
+        printf("SIGINT handler registration failed\n");
         return 1;
     }
 
     /* Open input and uinput */
     in = open(INPUT_PATH, O_RDONLY);
     if(in < 0) {
-        perror("open in");
+        perror("Could not open: " INPUT_PATH);
         return 1;
     }
 
@@ -100,7 +99,7 @@ int main(int argc, char** argv) {
         memset(&uidev, '\0', sizeof(struct uinput_user_dev));
         js[j] = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
         if (js[j] < 0) {
-            perror("open js[j]");
+            perror("Could not open:" UINPUT_PATH);
             return 1;
         }
 
@@ -132,13 +131,9 @@ int main(int argc, char** argv) {
             printf("Event: (Type: %d, Code: %d, Value %d)\n", e.type, e.code, e.value);
         }
 
-
         memset(&je, '\0', sizeof(struct input_event));
         nowrite = 1;
         j = 0;
-
-        /* Only catch keys and ignore auto-repeat (value == 2) */
-        /* TODO: Remove this EV_KEY contraint and use it in the macro */
 
         #define H_JOYMAP
         #include "config.h"
