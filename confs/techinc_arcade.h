@@ -33,6 +33,13 @@
  *   Macros that make sense here:
  *   - KEYMAP(<in_key>, <out_key>, <out_type>, <device>, <val>)
  *
+ *
+ * Notes:
+ * - To expose a joystick device, expose the BTN_JOYSTICK ``button'' with
+ *   JOYSTICK_ADD_KEY
+ * - To expose a mouse device, expose (at least) the BTN_LEFT button with
+ *   JOYSTICK_ADD_KEY
+ *
  * ----------------------------------------------------------------------------
  *
  * TODO:
@@ -92,7 +99,7 @@ JOYSTICK_ADD_KEY(ABS_HAT0Y, UI_SET_ABSBIT, 0)
 JOYSTICK_SET_LIM(absmax, 1, ABS_HAT0Y)
 JOYSTICK_SET_LIM(absmin, -1, ABS_HAT0Y)
 
-/* XXX: ALWAYS SET BTN_JOYSTICK TO EXPOSE A JOYSTICK EVENT */
+/* XXX: ALWAYS SET BTN_JOYSTICK TO EXPOSE A JOYSTICK DEVICE */
 JOYSTICK_ADD_KEY(BTN_JOYSTICK, UI_SET_KEYBIT, 0)
 
 /* Buttons. */
