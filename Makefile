@@ -6,10 +6,10 @@ CFLAGS+=-D_BSD_SOURCE
 
 default: map
 
-keys:
+def_keys.h:
 	echo '#include <linux/input.h>' | gcc -E -dM - | grep '#define KEY_' | cut -f2 -d" " | sed 's/KEY_.*/DEF_KEY(&)/' > def_keys.h
 
-map: map.c keys
+map: map.c def_keys.h
 	$(CC) map.c $(CFLAGS) -o map
 
 clean:
