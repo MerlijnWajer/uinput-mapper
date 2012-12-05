@@ -26,13 +26,18 @@
 #define JOYSTICK_SET_LIM(lim, val, key) \
     uidev.lim[key] = val;
 
+#define LEGAL_VALUE(statement, macro) \
+    if (statement) { \
+        macro \
+    }
 
-#define KEYMAP(in_key, out_key, out_type, device, val) \
-    case in_key: \
+#define KEYMAP(in_type, in_key, out_key, out_type, device, val) \
+    if(e.type == in_type && e.code == in_key) {\
         je.type = out_type; \
         je.code = out_key; \
         je.value = val(e.value); \
         j = device; \
-        break;
+        nowrite = 0;\
+    }
 
 #endif

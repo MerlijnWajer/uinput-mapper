@@ -134,26 +134,20 @@ int main(int argc, char** argv) {
 
 
         memset(&je, '\0', sizeof(struct input_event));
-        nowrite = 0;
+        nowrite = 1;
         j = 0;
 
         /* Only catch keys and ignore auto-repeat (value == 2) */
         /* TODO: Remove this EV_KEY contraint and use it in the macro */
-        if (e.type == EV_KEY && e.value != 2) {
-            switch(e.code) {
 
-            #define H_JOYMAP
-            #include "config.h"
+        #define H_JOYMAP
+        #include "config.h"
 
-            default:
-                nowrite = 1;
-            }
-            if (nowrite == 0) {
-                printf("Writing %d to %d\n", e.code, j);
-                if(write(js[j], &je, sizeof(struct input_event)) < 0) {
-                    perror("Event write event");
-                    return -1;
-                }
+        if (nowrite == 0) {
+            printf("Writing %d to %d\n", e.code, j);
+            if(write(js[j], &je, sizeof(struct input_event)) < 0) {
+                perror("Event write event");
+                return -1;
             }
         }
 
