@@ -1,6 +1,15 @@
 #ifndef H_CONFIG_FUNCTIONS
 #define H_CONFIG_FUNCTIONS
 
+#define ADD_INPUT_PATH(INPUT_PATH, NUM) \
+    /* Open input and uinput */ \
+    in[NUM] = open(INPUT_PATH, O_RDONLY); \
+    if(in[NUM] < 0) { \
+        perror("Could not open: " INPUT_PATH); \
+        return 1; \
+    }
+
+
 #define JOYSTICK_SET_OPT(opt, bit, device) \
     if (device == j) { \
         if (ioctl(js[device], bit, opt) < 0) { \

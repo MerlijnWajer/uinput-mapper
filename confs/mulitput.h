@@ -64,7 +64,7 @@
 #define JOYCOUNT 2
 
 /* Set up amount of input devices here */
-#define INPUT_DEVICE_COUNT 1
+#define INPUT_DEVICE_COUNT 2
 
 #endif
 
@@ -76,7 +76,8 @@
 #ifndef H_CONFIGURE_EVENTS_SEEN
 #define H_CONFIGURE_EVENTS_SEEN
 
-ADD_INPUT_PATH("/dev/input/by-path/platform-i8042-serio-0-event-kbd", 0)
+ADD_INPUT_PATH("/dev/input/event4", 0)
+ADD_INPUT_PATH("/dev/input/event5", 1)
 
 #endif
 #endif
