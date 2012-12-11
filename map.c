@@ -170,6 +170,10 @@ int main(int argc, char** argv) {
                 }
 
                 printf("Event: (Type: %d, Code: %d, Value %d)\n", e.type, e.code, e.value);
+            } else {
+                /* Update poll read mechanism */
+                fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
+                continue;
             }
 
             /* Now handle received event */
