@@ -31,8 +31,6 @@
 
 #include "config.h"
 
-#define UINPUT_PATH "/dev/uinput"
-
 /* Reverse mapping, for later use */
 static const struct _key_to_str {
     char *name;
@@ -106,10 +104,14 @@ int main(int argc, char** argv) {
     for(j = 0; j < JOYCOUNT; j++) {
         /* Memset because we are already setting the absmax/absmin */
         memset(&uidev, '\0', sizeof(struct uinput_user_dev));
-        js[j] = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
+        js[j] = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
         if (js[j] < 0) {
-            perror("Could not open:" UINPUT_PATH);
-            return 1;
+            perror("(NOT FATAL YET) Could not open: /dev/uinput");
+            js[j] = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
+            if (js[j] < 0) {
+                perror("(FATAL) Could not open: /dev/input/uinput");
+                return 1;
+            }
         }
 
         #define H_CONFIGURE_JOYSTICKS
