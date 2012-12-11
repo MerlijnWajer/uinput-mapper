@@ -66,6 +66,8 @@
 /* Set up amount of input devices here */
 #define INPUT_DEVICE_COUNT 2
 
+#define INPUT_DEVICE_ANY 0
+
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -156,36 +158,36 @@ JOYSTICK_ADD_KEY(BTN_3, UI_SET_KEYBIT, 1)
 
 LEGAL_VALUE(e.value == 1 || e.value == 0,
     /* HAT */
-    KEYMAP(EV_KEY, KEY_UP, ABS_HAT0Y, EV_ABS, 0, -)
-    KEYMAP(EV_KEY, KEY_DOWN, ABS_HAT0Y, EV_ABS, 0, +)
-    KEYMAP(EV_KEY, KEY_LEFT, ABS_HAT0X, EV_ABS, 0, -)
-    KEYMAP(EV_KEY, KEY_RIGHT, ABS_HAT0X, EV_ABS, 0, +)
+    KEYMAP(EV_KEY, KEY_UP, ABS_HAT0Y, EV_ABS, 0, -1, -)
+    KEYMAP(EV_KEY, KEY_DOWN, ABS_HAT0Y, EV_ABS, 0, -1, +)
+    KEYMAP(EV_KEY, KEY_LEFT, ABS_HAT0X, EV_ABS, 0, -1, -)
+    KEYMAP(EV_KEY, KEY_RIGHT, ABS_HAT0X, EV_ABS, 0, -1, +)
 
     /* Red buttons */
-    KEYMAP(EV_KEY, KEY_LEFTCTRL, BTN_0, EV_KEY, 0, +)
-    KEYMAP(EV_KEY, KEY_LEFTALT, BTN_1, EV_KEY, 0, +)
-    KEYMAP(EV_KEY, KEY_SPACE, BTN_2, EV_KEY, 0, +)
+    KEYMAP(EV_KEY, KEY_LEFTCTRL, BTN_0, EV_KEY, 0, -1, +)
+    KEYMAP(EV_KEY, KEY_LEFTALT, BTN_1, EV_KEY, 0, -1, +)
+    KEYMAP(EV_KEY, KEY_SPACE, BTN_2, EV_KEY, 0, -1, +)
 
     /* Yellow button */
-    KEYMAP(EV_KEY, KEY_1, BTN_3, EV_KEY, 0, +)
+    KEYMAP(EV_KEY, KEY_1, BTN_3, EV_KEY, 0, -1, +)
 )
 
 /* Second joystick */
 
 LEGAL_VALUE(e.value == 1 || e.value == 0,
     /* HAT */
-    KEYMAP(EV_KEY, KEY_R, ABS_HAT0Y, EV_ABS, 1, -)
-    KEYMAP(EV_KEY, KEY_F, ABS_HAT0Y, EV_ABS, 1, +)
-    KEYMAP(EV_KEY, KEY_D, ABS_HAT0X, EV_ABS, 1, -)
-    KEYMAP(EV_KEY, KEY_G, ABS_HAT0X, EV_ABS, 1, +)
+    KEYMAP(EV_KEY, KEY_R, ABS_HAT0Y, EV_ABS, 1, -1, -)
+    KEYMAP(EV_KEY, KEY_F, ABS_HAT0Y, EV_ABS, 1, -1, +)
+    KEYMAP(EV_KEY, KEY_D, ABS_HAT0X, EV_ABS, 1, -1, -)
+    KEYMAP(EV_KEY, KEY_G, ABS_HAT0X, EV_ABS, 1, -1, +)
 
     /* Red buttons */
-    KEYMAP(EV_KEY, KEY_A, BTN_0, EV_KEY, 1, +)
-    KEYMAP(EV_KEY, KEY_S, BTN_1, EV_KEY, 1, +)
-    KEYMAP(EV_KEY, KEY_Q, BTN_2, EV_KEY, 1, +)
+    KEYMAP(EV_KEY, KEY_A, BTN_0, EV_KEY, 1, -1, +)
+    KEYMAP(EV_KEY, KEY_S, BTN_1, EV_KEY, 1, -1, +)
+    KEYMAP(EV_KEY, KEY_Q, BTN_2, EV_KEY, 1, -1, +)
 
     /* Yellow button */
-    KEYMAP(EV_KEY, KEY_2, BTN_3, EV_KEY, 1, +)
+    KEYMAP(EV_KEY, KEY_2, BTN_3, EV_KEY, 1, -1, +)
 )
 
 #endif

@@ -172,10 +172,6 @@ int main(int argc, char** argv) {
                 printf("Event: (Type: %d, Code: %d, Value %d)\n", e.type, e.code, e.value);
             }
 
-            /* Update poll read mechanism */
-            fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
-            rfds -= 1;
-
             /* Now handle received event */
             memset(&je, '\0', sizeof(struct input_event));
             nowrite = 1;
@@ -183,6 +179,10 @@ int main(int argc, char** argv) {
 
             #define H_JOYMAP
             #include "config.h"
+
+            /* Update poll read mechanism */
+            fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
+            rfds -= 1;
 
             if (nowrite == 0) {
                 printf("Writing %d to %d\n", e.code, j);

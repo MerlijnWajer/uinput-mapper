@@ -40,8 +40,8 @@
         macro \
     }
 
-#define KEYMAP(in_type, in_key, out_key, out_type, device, val) \
-    if(e.type == in_type && e.code == in_key) {\
+#define KEYMAP(in_type, in_key, out_key, out_type, device, in_device, val) \
+    if(e.type == in_type && e.code == in_key && (in_device == -1 || in_device == fdrr)) {\
         je.type = out_type; \
         je.code = out_key; \
         je.value = val(e.value); \
