@@ -79,7 +79,7 @@
 #define H_CONFIGURE_EVENTS_SEEN
 
 ADD_INPUT_PATH("/dev/input/by-id/usb-Cypress_I-PAC_Arcade_Control_Interface-event-kbd", 0)
-ADD_INPUT_PATH("usb-Dell_Dell_USB_Keyboard-event-kbd", 1)
+ADD_INPUT_PATH("/dev/input/by-id/usb-Dell_Dell_USB_Keyboard-event-kbd", 1)
 
 #endif
 #endif
