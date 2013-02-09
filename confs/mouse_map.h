@@ -6,9 +6,22 @@
 /* Set up amount of joysticks here */
 #define JOYCOUNT 1
 
-/* Set up event to read from */
-#define INPUT_PATH "/dev/input/by-path/platform-i8042-serio-0-event-kbd"
+/* Set up amount of input devices here */
+#define INPUT_DEVICE_COUNT 1
 
+#endif
+
+/* -------------------------------------------------------------------------- */
+/* ------------------- FIRST AND A HALF SECTION ----------------------------- */
+/* -------------------------------------------------------------------------- */
+
+#ifdef H_CONFIGURE_EVENTS
+#ifndef H_CONFIGURE_EVENTS_SEEN
+#define H_CONFIGURE_EVENTS_SEEN
+
+ADD_INPUT_PATH("/dev/input/by-path/platform-i8042-serio-0-event-kbd", 0)
+
+#endif
 #endif
 
 /* -------------------------------------------------------------------------- */
@@ -44,11 +57,11 @@ JOYSTICK_ADD_KEY(REL_Y, UI_SET_RELBIT, 0)
 #ifndef H_JOYMAP_SEEN
 #define H_JOYMAP_SEEN
 
-KEYMAP(EV_KEY, KEY_3, BTN_LEFT, EV_KEY, 0, +)
-KEYMAP(EV_KEY, KEY_M, REL_X, EV_REL, 0, 10*)
-KEYMAP(EV_KEY, KEY_N, REL_X, EV_REL, 0, -10*)
-KEYMAP(EV_KEY, KEY_J, REL_Y, EV_REL, 0, 10*)
-KEYMAP(EV_KEY, KEY_K, REL_Y, EV_REL, 0, -10*)
+KEYMAP(EV_KEY, KEY_3, BTN_LEFT, EV_KEY, 0, -1, +)
+KEYMAP(EV_KEY, KEY_M, REL_X, EV_REL, 0, -1, 10*)
+KEYMAP(EV_KEY, KEY_N, REL_X, EV_REL, 0, -1, -10*)
+KEYMAP(EV_KEY, KEY_J, REL_Y, EV_REL, 0, -1, 10*)
+KEYMAP(EV_KEY, KEY_K, REL_Y, EV_REL, 0, -1, -10*)
 
 #endif
 #endif

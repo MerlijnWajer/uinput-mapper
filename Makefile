@@ -9,7 +9,7 @@ default: map
 def_keys.h:
 	echo '#include <linux/input.h>' | gcc -E -dM - | grep '#define KEY_' | cut -f2 -d" " | sed 's/KEY_.*/DEF_KEY(&)/' > def_keys.h
 
-map: map.c def_keys.h config.h
+map: map.c def_keys.h config.h config_functions.h
 	$(CC) map.c $(CFLAGS) -o map
 
 clean:

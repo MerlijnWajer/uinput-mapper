@@ -1,6 +1,15 @@
 #ifndef H_CONFIG_FUNCTIONS
 #define H_CONFIG_FUNCTIONS
 
+#define ADD_INPUT_PATH(INPUT_PATH, NUM) \
+    /* Open input and uinput */ \
+    in[NUM] = open(INPUT_PATH, O_RDONLY); \
+    if(in[NUM] < 0) { \
+        perror("Could not open: " INPUT_PATH); \
+        return 1; \
+    }
+
+
 #define JOYSTICK_SET_OPT(opt, bit, device) \
     if (device == j) { \
         if (ioctl(js[device], bit, opt) < 0) { \
@@ -31,8 +40,8 @@
         macro \
     }
 
-#define KEYMAP(in_type, in_key, out_key, out_type, device, val) \
-    if(e.type == in_type && e.code == in_key) {\
+#define KEYMAP(in_type, in_key, out_key, out_type, device, in_device, val) \
+    if(e.type == in_type && e.code == in_key && (in_device == -1 || in_device == fdrr)) {\
         je.type = out_type; \
         je.code = out_key; \
         je.value = val(e.value); \
