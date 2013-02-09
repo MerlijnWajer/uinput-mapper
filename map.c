@@ -25,9 +25,11 @@
 #include <linux/input.h>
 #include <linux/uinput.h>
 
-#include "config.h"
+#include <err.h>
+#include <poll.h>
+#include <errno.h>
 
-#define UINPUT_PATH "/dev/uinput"
+#include "config.h"
 
 /* Reverse mapping, for later use */
 static const struct _key_to_str {
@@ -71,8 +73,9 @@ void free_js(int sig) {
 }
 
 int main(int argc, char** argv) {
-    int j, nowrite;
-    int in; /* fds */
+    int j, nowrite, rfds, fdrr = 0;
+    int in[INPUT_DEVICE_COUNT]; /* fds */
+    struct pollfd pin[INPUT_DEVICE_COUNT];
     struct input_event e, je;
     struct uinput_user_dev uidev;
 
@@ -82,25 +85,33 @@ int main(int argc, char** argv) {
 
     (void)get_key_num;
 
-    if(signal(SIGINT, free_js)) {
-        printf("SIGINT handler registration failed\n");
-        return 1;
+    /* Open required input devices */
+    #define H_CONFIGURE_EVENTS
+    #include "config.h"
+
+    /* Now setup poll structure */
+    for (j = 0; j < INPUT_DEVICE_COUNT; j++)
+    {
+        pin[j].fd = in[j];
+        pin[j].events = POLLIN;
     }
 
-    /* Open input and uinput */
-    in = open(INPUT_PATH, O_RDONLY);
-    if(in < 0) {
-        perror("Could not open: " INPUT_PATH);
+    if(signal(SIGINT, free_js) == SIG_ERR) {
+        printf("SIGINT handler registration failed\n");
         return 1;
     }
 
     for(j = 0; j < JOYCOUNT; j++) {
         /* Memset because we are already setting the absmax/absmin */
         memset(&uidev, '\0', sizeof(struct uinput_user_dev));
-        js[j] = open(UINPUT_PATH, O_WRONLY | O_NONBLOCK);
+        js[j] = open("/dev/uinput", O_WRONLY | O_NONBLOCK);
         if (js[j] < 0) {
-            perror("Could not open:" UINPUT_PATH);
-            return 1;
+            perror("(NOT FATAL YET) Could not open: /dev/uinput");
+            js[j] = open("/dev/input/uinput", O_WRONLY | O_NONBLOCK);
+            if (js[j] < 0) {
+                perror("(FATAL) Could not open: /dev/input/uinput");
+                return 1;
+            }
         }
 
         #define H_CONFIGURE_JOYSTICKS
@@ -116,51 +127,95 @@ int main(int argc, char** argv) {
 
         if (write(js[j], &uidev, sizeof(uidev)) < 0) {
             perror("write");
-            return -1;
+            return EXIT_FAILURE;
         }
 
         if (ioctl(js[j], UI_DEV_CREATE)) {
             perror("ioctl create");
-            return 1;
+            return EXIT_FAILURE;
         }
     }
 
     /* Do it! */
     while (1) {
-        if (read(in, &e, sizeof(struct input_event))) {
-            printf("Event: (Type: %d, Code: %d, Value %d)\n", e.type, e.code, e.value);
+        printf("Entering poll..\n");
+        /* Any data available? */
+        if ((rfds = poll(pin, INPUT_DEVICE_COUNT, -1)) < 0) {
+            /* Interrupted by signal */
+            if (errno == EINTR)
+                continue;
+            perror("poll");
+            return EXIT_FAILURE;
         }
+        printf("Leaving poll..\n");
 
-        memset(&je, '\0', sizeof(struct input_event));
-        nowrite = 1;
-        j = 0;
+        /* Round-robin check readers */
+        while (rfds) {
+            if (pin[fdrr].revents & POLLIN) {
+                printf("Device %d has input\n", fdrr);
+                /* XXX: Need checking for complete read? */
+                if (read(in[fdrr], &e, sizeof(struct input_event)) < 0) {
+                    /* Interrupted by singal? Retry */
+                    if (errno == EINTR)
+                        continue;
 
-        #define H_JOYMAP
-        #include "config.h"
+#if 0
+                    if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                        printf("poll tells us device %d is readable.. it is not\n", fdrr);
+                        rfds -= 1;
+                        fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
+                        continue;
+                    }
+#endif
 
-        if (nowrite == 0) {
-            printf("Writing %d to %d\n", e.code, j);
-            if(write(js[j], &je, sizeof(struct input_event)) < 0) {
-                perror("Event write event");
-                return -1;
+                    err(EXIT_FAILURE, "reading input device nr. %d failed", fdrr);
+                }
+
+                printf("Event: (Type: %d, Code: %d, Value %d)\n", e.type, e.code, e.value);
+            } else {
+                /* Update poll read mechanism */
+                fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
+                continue;
             }
-        }
 
-        /* Synchronisation events */
-        if (e.type == EV_SYN) {
+            /* Now handle received event */
             memset(&je, '\0', sizeof(struct input_event));
-            printf("SYN event\n");
+            nowrite = 1;
+            j = 0;
 
-            je.type = EV_SYN;
-            je.code = 0;
-            je.value = 0;
+            #define H_JOYMAP
+            #include "config.h"
 
-            if (write(js[j], &je, sizeof(struct input_event)) < 0) {
-                perror("SYN write event");
-                return -1;
+            /* Update poll read mechanism */
+            fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
+            rfds -= 1;
+
+            if (nowrite == 0) {
+                printf("Writing %d to %d\n", e.code, j);
+                if(write(js[j], &je, sizeof(struct input_event)) < 0) {
+                    perror("Event write event");
+                    return EXIT_FAILURE;
+                }
             }
-        }
-    }
 
+            /* Synchronisation events */
+            if (e.type == EV_SYN) {
+                memset(&je, '\0', sizeof(struct input_event));
+                printf("SYN event\n");
 
+                je.type = EV_SYN;
+                je.code = 0;
+                je.value = 0;
+
+                if (write(js[j], &je, sizeof(struct input_event)) < 0) {
+                    perror("SYN write event");
+                    return EXIT_FAILURE;
+                }
+            }
+
+        } /* End reader check loop */
+
+    } /* End main loop */
+
+    return 0;
 }
