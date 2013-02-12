@@ -5,8 +5,6 @@ CFLAGS+=-ansi -pedantic -pipe -D_BSD_SOURCE \
 	-Wall -Wextra -Werror -Wno-unused-result
 OPT=-O2
 
-all: map
-
 debug: OPT=-O0
 debug: CFLAGS+=-ggdb
 debug: map
