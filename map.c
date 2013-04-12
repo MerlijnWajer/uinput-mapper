@@ -42,6 +42,16 @@ static const struct _key_to_str {
     {NULL, -1}
 };
 
+static const struct _btn_to_str {
+    char *name;
+    int num;
+} btn_map[] = {
+#define DEF_BTN(NAME) \
+    {#NAME,NAME},
+    #include "def_buttons.h"
+    {NULL, -1}
+};
+
 static int get_key_num(char* name)
 {
     int i = 0;
@@ -70,6 +80,73 @@ void free_js(int sig) {
         close(js[j]);
     }
     exit(1);
+}
+
+int scan_device(char *f, int nfd) {
+#define BITS_PER_LONG (sizeof(long) * 8)
+#define NBITS(x) ((((x)-1)/BITS_PER_LONG)+1)
+#define OFF(x)  ((x)%BITS_PER_LONG)
+#define BIT(x)  (1UL<<OFF(x))
+#define LONG(x) ((x)/BITS_PER_LONG)
+#define test_bit(bit, array)    ((array[LONG(bit)] >> OFF(bit)) & 1)
+        int i, j;
+        int version;
+        unsigned short id[4];
+        char name[256] = "Unknown";
+        unsigned long bit[EV_MAX][NBITS(KEY_MAX)];
+        int fd;
+
+        fd = open(f, O_RDONLY);
+
+        if (ioctl(fd, EVIOCGVERSION, &version)) {
+                perror("evtest: can't get version");
+                return 1;
+        }
+
+        printf("Input driver version is %d.%d.%d\n",
+                version >> 16, (version >> 8) & 0xff, version & 0xff);
+
+        ioctl(fd, EVIOCGID, id);
+        printf("Input device ID: bus 0x%x vendor 0x%x product 0x%x version 0x%x\n",
+                id[ID_BUS], id[ID_VENDOR], id[ID_PRODUCT], id[ID_VERSION]);
+
+        ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+        printf("Input device name: \"%s\"\n", name);
+
+        memset(bit, 0, sizeof(bit));
+        ioctl(fd, EVIOCGBIT(0, EV_MAX), bit[0]);
+        printf("Supported events:\n");
+
+        for (i = 0; i < EV_MAX; i++)
+                if (test_bit(i, bit[0])) {
+                        /*printf("  Event type %d (%s)\n", i, events[i] ? events[i] : "?");*/
+                        if (!i) continue;
+
+                        /* Skip ev_syn; daarna kan je ook storen in bit[i], want i != 0*/
+                        printf("major ioctl: %d, %ld, %d\n", nfd, UI_SET_EVBIT, i);
+                        printf("major ioctl: %d\n", ioctl(nfd, UI_SET_EVBIT, i));
+
+                        ioctl(fd, EVIOCGBIT(i, KEY_MAX), bit[i]);
+                        for (j = 0; j < KEY_MAX; j++)
+                                if (test_bit(j, bit[i])) {
+                                        long kbit;
+                                        switch (i) {
+                                            case EV_KEY: kbit = UI_SET_KEYBIT; break;
+                                            case EV_REL: kbit = UI_SET_RELBIT; break;
+                                            case EV_ABS: kbit = UI_SET_ABSBIT; break;
+                                        }
+
+                                        printf("Setting key: %d\n", j);
+                                        printf("ioctl: %d\n", ioctl(nfd, kbit, j));
+                                        /*printf("    Event code %d (%s)\n", j, names[i] ? (names[i][j] ? names[i][j] : "?") : "?");*/
+                                        if (i == EV_ABS) {
+                                            /* XXX: TODO */
+                                                /*print_absdata(fd, j);*/
+                                        }
+                                }
+                }
+
+        return 0;
 }
 
 int main(int argc, char** argv) {
@@ -114,8 +191,11 @@ int main(int argc, char** argv) {
             }
         }
 
+
+        printf("js[j] %d\n", js[j]);
         #define H_CONFIGURE_JOYSTICKS
         #include "config.h"
+        scan_device("/dev/input/event6", js[j]);
 
         /* Allocate device info */
         snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:%d", j);
@@ -183,8 +263,14 @@ int main(int argc, char** argv) {
             nowrite = 1;
             j = 0;
 
+            je.type = e.type;
+            je.code = e.code;
+            je.value = e.value;
+            nowrite = 0;
+            /*
             #define H_JOYMAP
             #include "config.h"
+            */
 
             /* Update poll read mechanism */
             fdrr = (fdrr + 1) % INPUT_DEVICE_COUNT;
