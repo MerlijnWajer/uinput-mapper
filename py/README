@@ -6,7 +6,7 @@ Generate:
     - REL_*
     - ABS_*
 
-    gcc -E -dM /usr/include/linux/input.h | egrep ' (KEY|BTN|EV|REL|ABS)_[A-Za-z0-9_]+' | ( echo "#include <linux/input.h>" ; echo "input_constants_dict = {" ; sed -r 's/[^ ]+ +([^ ]+).*/"\1" : \1,/' ; echo "}" ) | gcc -E -o /dev/stdout - | grep 'input_constants_dict = {' -A 100000
+    gcc -E -dM /usr/include/linux/input.h | egrep ' (KEY|BTN|EV|REL|ABS|SYN)_[A-Za-z0-9_]+' | ( echo "#include <linux/input.h>" ; echo "input_constants_dict = {" ; sed -r 's/[^ ]+ +([^ ]+).*/"\1" : \1,/' ; echo "}" ) | gcc -E -o /dev/stdout - | grep 'input_constants_dict = {' -A 100000 > gen.py
 
 
     Lambas for EVIO*

@@ -10,8 +10,9 @@
     }
 
 
-#define JOYSTICK_SET_OPT(opt, bit, device) \
+#define MAPPER_SET_OPT(opt, bit, device) \
     if (device == j) { \
+        printf("SET_OPT: %d, %ld, %d\n", opt, bit, device); \
         if (ioctl(js[device], bit, opt) < 0) { \
             perror("Error in JOYSTICK_SET_OPT"); \
             fprintf(stderr, "ERROR: JOYSTICK_SET_OPT for device %d, opt %s, bit: %s\n", device, #opt, #bit); \
@@ -20,7 +21,7 @@
         } \
     }
 
-#define JOYSTICK_ADD_KEY(key, bit, device) \
+#define MAPPER_ADD_KEY(key, bit, device) \
     if (device == j) { \
         if (ioctl(js[device], bit, key) < 0) { \
             perror("Error in JOYSTICK_ADD_KEY"); \

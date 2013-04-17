@@ -195,7 +195,7 @@ int main(int argc, char** argv) {
         printf("js[j] %d\n", js[j]);
         #define H_CONFIGURE_JOYSTICKS
         #include "config.h"
-        scan_device("/dev/input/event6", js[j]);
+        scan_device("/dev/input/event8", js[j]);
 
         /* Allocate device info */
         snprintf(uidev.name, UINPUT_MAX_NAME_SIZE, "key2joy:%d", j);

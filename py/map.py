@@ -1,25 +1,27 @@
 import cinput
 import ctypes
 
-f = open("/dev/input/event5")
+import sys
 
+print sys.argv[1]
+f = open(sys.argv[1] if len(sys.argv) else "/dev/input/event8")
 
 while True:
-    #print ctypes.sizeof(input.input_event)
-    hoi = f.read(ctypes.sizeof(cinput.input_event))
-    #print repr(hoi)
+    estr = f.read(ctypes.sizeof(cinput.input_event))
 
-    e = ctypes.cast(hoi, ctypes.POINTER(cinput.input_event))
+    e = ctypes.cast(estr, ctypes.POINTER(cinput.input_event))
     ev = e.contents
 
-    keys = filter(lambda (k, v): k.startswith("KEY_") or k.startswith("BTN_"),
-        cinput.input_constants_dict.iteritems())
-
     if ev.type == cinput.EV_KEY:
-        for k, v in keys:
-            if v == ev.code:
-                print k
-        #print e.contents.type
-        #print e.contents.code
-        #print e.contents.value
+        print cinput.rev_keys[ev.code]
+    if ev.type == cinput.EV_REL:
+        print cinput.rev_rel[ev.code]
+    if ev.type == cinput.EV_ABS:
+        print cinput.rev_absaxes[ev.code]
+    if ev.type == cinput.EV_SYN:
+        print cinput.rev_syn[ev.code]
+
+    #print e.contents.type
+    #print e.contents.code
+    #print e.contents.value
 
