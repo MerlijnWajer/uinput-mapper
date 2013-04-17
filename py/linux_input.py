@@ -1,7 +1,5 @@
 import ctypes
 
-# structure
-
 """
 struct input_event {
     struct timeval time;
