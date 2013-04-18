@@ -1,5 +1,7 @@
 import ctypes
 
+import struct
+
 """
 struct input_event {
     struct timeval time;
@@ -8,6 +10,71 @@ struct input_event {
     __s32 value;
 };
 """
+
+from gen import input_constants_dict as icd
+
+for k, v in icd.iteritems():
+    locals()[k] = v
+
+
+rdict = lambda x: dict(map(lambda (k, v): (v, k), x))
+
+events = filter(lambda (k, v): k in ["EV_SYN", "EV_KEY", "EV_REL",
+    "EV_ABS", "EV_MSC", "EV_SW", "EV_LED", "EV_SND", "EV_REP",
+    "EV_FF", "EV_PWR", "EV_FF_STATUS"], icd.iteritems())
+rev_events = rdict(events)
+
+
+# event sets
+"""
+static const char * const * const names[EV_MAX + 1] = {
+	[0 ... EV_MAX] = NULL,
+	[EV_SYN] = events,			[EV_KEY] = keys,
+	[EV_REL] = relatives,			[EV_ABS] = absolutes,
+	[EV_MSC] = misc,			[EV_LED] = leds,
+	[EV_SND] = sounds,			[EV_REP] = repeats,
+	[EV_SW] = switches,
+	[EV_FF] = force,			[EV_FF_STATUS] = forcestatus,
+};
+"""
+
+keys = filter(lambda (k, v): k.startswith("KEY_") or k.startswith("BTN_"),
+    icd.iteritems())
+rev_keys = rdict(keys)
+
+absaxes = filter(lambda (k, v): k.startswith("ABS_"),
+    icd.iteritems())
+rev_absaxes = rdict(absaxes)
+
+rel  = filter(lambda (k, v): k.startswith("REL_"),
+    icd.iteritems())
+rev_rel = rdict(rel)
+
+syn = filter(lambda (k, v): k.startswith("SYN_"),
+    icd.iteritems())
+rev_syn = rdict(syn)
+
+del rdict
+
+# TODO
+misc = {}
+
+leds = sounds = repeats = switches = force = forcestatus = None
+
+event_keys = {
+        EV_SYN: rev_syn,
+        EV_KEY: rev_keys,
+        EV_REL: rev_rel,
+        EV_ABS: rev_absaxes,
+        EV_MSC: misc,
+        EV_LED: leds,
+        EV_SND: sounds,
+        EV_REP: repeats,
+        EV_SW:  switches,
+        EV_FF:  force,
+        EV_FF_STATUS: forcestatus
+}
+
 
 class timeval(ctypes.Structure):
     _fields_ = [("tv_sec", ctypes.c_long), ("tv_usec", ctypes.c_long)]
@@ -18,6 +85,14 @@ class input_event(ctypes.Structure):
         ("type", ctypes.c_uint16),
         ("code", ctypes.c_uint16),
         ("value", ctypes.c_int32)
+    ]
+
+class input_id (ctypes.Structure):
+    _fields_ = [
+        ("bustype", ctypes.c_uint16),
+        ("vendor", ctypes.c_uint16),
+        ("product", ctypes.c_uint16),
+        ("version", ctypes.c_uint16),
     ]
 
 from ioctlhelp import IOR, IOW, IOC, IO, _IOC_READ
@@ -80,18 +155,3 @@ EVIOCGBIT = lambda ev, _len: IOC(_IOC_READ, ord('E'), 0x20 + ev, _len)
 #
 #EVIOCSCLOCKID		_IOW('E', 0xa0, int)			/* Set clockid to be used for timestamps */
 
-import array, struct, fcntl
-
-def get_input_version(f):
-    buf = array.array('i', [0])
-    r = fcntl.ioctl(f, EVIOCGVERSION, buf)
-    v = struct.unpack('@i', buf)[0]
-    del r
-    return "%d.%d.%d" % ( v >> 16, (v >> 8) & 0xff, v & 0xff)
-
-def get_input_name(f, l=256):
-    buf = array.array('c', ' ' * l)
-    r = fcntl.ioctl(f, EVIOCGNAME(l), buf)
-    v = struct.unpack('%ds' % l, buf)
-    del r
-    return v
