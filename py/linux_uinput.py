@@ -35,17 +35,17 @@ EV_UINPUT = 0x0101
 UI_FF_UPLOAD = 1
 UI_FF_ERASE = 2
 
-
 import ctypes
 
 UINPUT_MAX_NAME_SIZE = 80
 class uinput_user_dev(ctypes.Structure):
     _fields_ = [
         ("name", ctypes.c_char * UINPUT_MAX_NAME_SIZE),
-        ("id", linux_input.input_id),
+        ("_id", linux_input.input_id),
         ("ff_effects_max", ctypes.c_uint32),
         ("absmax", ctypes.c_int32),
         ("absmin", ctypes.c_int32),
         ("absfuzz", ctypes.c_int32),
         ("absflac", ctypes.c_int32)
     ]
+
