@@ -2,15 +2,6 @@ import ctypes
 
 import struct
 
-"""
-struct input_event {
-    struct timeval time;
-    __u16 type;
-    __u16 code;
-    __s32 value;
-};
-"""
-
 from gen import input_constants_dict as icd
 
 for k, v in icd.iteritems():
