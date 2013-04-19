@@ -45,11 +45,17 @@ def create_device(specs):
 
     return f
 
-create_device(None)
+def free_device(f):
+    return fcntl.ioctl(f, linux_uinput.UI_DEV_DESTROY)
+
+
+_ = create_device(None)
 
 print 'Hoi'
 import time
 time.sleep(5)
+
+free_device(_)
 # config
 #dev = {
 #   "input_devices" : [
