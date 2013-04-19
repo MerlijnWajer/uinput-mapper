@@ -36,6 +36,7 @@ UI_FF_UPLOAD = 1
 UI_FF_ERASE = 2
 
 import ctypes
+import linux_input
 
 UINPUT_MAX_NAME_SIZE = 80
 class uinput_user_dev(ctypes.Structure):
@@ -43,9 +44,10 @@ class uinput_user_dev(ctypes.Structure):
         ("name", ctypes.c_char * UINPUT_MAX_NAME_SIZE),
         ("_id", linux_input.input_id),
         ("ff_effects_max", ctypes.c_uint32),
-        ("absmax", ctypes.c_int32),
-        ("absmin", ctypes.c_int32),
-        ("absfuzz", ctypes.c_int32),
-        ("absflac", ctypes.c_int32)
+        ("absmax", ctypes.c_int32 * linux_input.ABS_CNT),
+        ("absmin", ctypes.c_int32 * linux_input.ABS_CNT),
+        ("absfuzz", ctypes.c_int32 * linux_input.ABS_CNT),
+        ("absflac", ctypes.c_int32 * linux_input.ABS_CNT)
     ]
 
+print 'SIZEOF:', ctypes.sizeof(uinput_user_dev)

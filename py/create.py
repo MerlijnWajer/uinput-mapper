@@ -33,11 +33,12 @@ def create_device(specs):
     # * Make sure the value is properly written to 'f'
     uidev = linux_uinput.uinput_user_dev()
 
-    uidev.name = 'key2joy\0'
+    uidev.name = 'key2joy'
     uidev._id.bustype = 0x03 # BUS_USB (TODO)
     uidev._id.vendor = 0x42
-    uidev._id.product = 0xBEBE
-    uidev._id.product = 1
+    uidev._id.product = 0xbebe
+    uidev._id.version = 1
+
 
     buf = buffer(uidev)[:]
     print repr(buf)
