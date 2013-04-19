@@ -49,5 +49,3 @@ class uinput_user_dev(ctypes.Structure):
         ("absfuzz", ctypes.c_int32 * linux_input.ABS_CNT),
         ("absflac", ctypes.c_int32 * linux_input.ABS_CNT)
     ]
-
-print 'SIZEOF:', ctypes.sizeof(uinput_user_dev)
