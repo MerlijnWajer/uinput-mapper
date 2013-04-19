@@ -1,11 +1,12 @@
-import cinput, linux_uinput, ctypes, fcntl
+import cinput, linux_uinput, ctypes, fcntl, os
+
 
 def open_uinput():
     try:
-        f = open('/dev/uinput', 'w+')
+        f = os.open('/dev/uinput',  os.O_WRONLY | os.O_NONBLOCK)
     except IOError:
         try:
-            f = open('/dev/input/uinput', 'w+')
+            f = os.open('/dev/input/uinput', os.O_WRONLY | os.O_NONBLOCK)
         except IOError:
             print 'FAIL MUCH?'
             return None
@@ -27,24 +28,18 @@ def create_device(specs):
     handle_specs(f, specs)
 
     # Allocate other info
-    # TODO:
-    # * Make sure the uidev structure is correct
-    # * Make sure that we are setting the values in the structure
-    # * Make sure the value is properly written to 'f'
     uidev = linux_uinput.uinput_user_dev()
 
-    uidev.name = 'key2joy'
+    uidev.name = 'key2joy:0'
     uidev._id.bustype = 0x03 # BUS_USB (TODO)
     uidev._id.vendor = 0x42
     uidev._id.product = 0xbebe
     uidev._id.version = 1
 
-
     buf = buffer(uidev)[:]
-    print repr(buf)
 
     # Write dev info
-    f.write(buf)
+    os.write(f, buf)
 
     print 'ioctl:', fcntl.ioctl(f, linux_uinput.UI_DEV_CREATE)
 
