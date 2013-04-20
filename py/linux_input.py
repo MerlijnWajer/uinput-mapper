@@ -8,11 +8,11 @@ for k, v in icd.iteritems():
     locals()[k] = v
 
 
-rdict = lambda x: dict(map(lambda (k, v): (v, k), x))
+rdict = lambda x: dict(map(lambda (k, v): (v, k), x.iteritems()))
 
-events = filter(lambda (k, v): k in ["EV_SYN", "EV_KEY", "EV_REL",
+events = dict(filter(lambda (k, v): k in ["EV_SYN", "EV_KEY", "EV_REL",
     "EV_ABS", "EV_MSC", "EV_SW", "EV_LED", "EV_SND", "EV_REP",
-    "EV_FF", "EV_PWR", "EV_FF_STATUS"], icd.iteritems())
+    "EV_FF", "EV_PWR", "EV_FF_STATUS"], icd.iteritems()))
 rev_events = rdict(events)
 
 
@@ -29,39 +29,49 @@ static const char * const * const names[EV_MAX + 1] = {
 };
 """
 
-keys = filter(lambda (k, v): k.startswith("KEY_") or k.startswith("BTN_"),
-    icd.iteritems())
+filter_event = lambda c: dict(filter(lambda (k, v): c(k), icd.iteritems()))
+
+keys = filter_event(lambda x: x.startswith("KEY_") or x.startswith("BTN_"))
 rev_keys = rdict(keys)
 
-absaxes = filter(lambda (k, v): k.startswith("ABS_"),
-    icd.iteritems())
+absaxes = filter_event(lambda x: x.startswith("ABS_"))
 rev_absaxes = rdict(absaxes)
 
-rel  = filter(lambda (k, v): k.startswith("REL_"),
-    icd.iteritems())
+rel = filter_event(lambda x: x.startswith("REL_"))
 rev_rel = rdict(rel)
 
-syn = filter(lambda (k, v): k.startswith("SYN_"),
-    icd.iteritems())
+syn = filter_event(lambda x: x.startswith("SYN_"))
 rev_syn = rdict(syn)
+
+misc = filter_event(lambda x: x.startswith("MSC_"))
+rev_misc = rdict(misc)
+
+leds = filter_event(lambda x: x.startswith("LED_"))
+rev_leds = rdict(leds)
+
+sounds = filter_event(lambda x: x.startswith("SND_"))
+rev_sounds = rdict(sounds)
+
+repeats = filter_event(lambda x: x.startswith("REP_"))
+rev_repeats = rdict(repeats)
+
+switches = filter_event(lambda x: x.startswith("SW_"))
+rev_switches = rdict(switches)
 
 del rdict
 
-# TODO
-misc = {}
-
-leds = sounds = repeats = switches = force = forcestatus = None
+force, forcestatus = {}, {}
 
 event_keys = {
         EV_SYN: rev_syn,
         EV_KEY: rev_keys,
         EV_REL: rev_rel,
         EV_ABS: rev_absaxes,
-        EV_MSC: misc,
-        EV_LED: leds,
-        EV_SND: sounds,
-        EV_REP: repeats,
-        EV_SW:  switches,
+        EV_MSC: rev_misc,
+        EV_LED: rev_leds,
+        EV_SND: rev_sounds,
+        EV_REP: rev_repeats,
+        EV_SW:  rev_switches,
         EV_FF:  force,
         EV_FF_STATUS: forcestatus
 }

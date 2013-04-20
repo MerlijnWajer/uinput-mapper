@@ -1,7 +1,7 @@
 from linux_input import *
 from linux_uinput import *
 
-import array, struct, fcntl, os
+import array, struct, fcntl, os, sys
 
 def get_input_version(f):
     """
@@ -10,7 +10,7 @@ def get_input_version(f):
     buf = array.array('i', [0])
     r = fcntl.ioctl(f, EVIOCGVERSION, buf)
     v = struct.unpack('@i', buf)[0]
-    del r
+    del buf
     return "%d.%d.%d" % ( v >> 16, (v >> 8) & 0xff, v & 0xff)
 
 def get_input_name(f, l=256):
@@ -19,33 +19,75 @@ def get_input_name(f, l=256):
     """
     buf = array.array('c', ' ' * l)
     r = fcntl.ioctl(f, EVIOCGNAME(l), buf)
-    v = struct.unpack('%ds' % l, buf)
-    del r
-    return v
+    v = struct.unpack('%ds' % l, buf)[0]
+    del buf
+    return v[:r]
 
 _bpl = struct.calcsize('@L') * 8
 _nbits = lambda x: ((x-1) / _bpl) + 1
 _ll = _nbits(KEY_MAX)
 test_bit = lambda j, v: (v[j / _bpl] >> (j % _bpl)) & 1
 
-# TODO: Do this for all EV_* ?
 def get_keys(f, ev):
     buf = array.array('L', [0L] * _ll)
     try:
         fcntl.ioctl(f, EVIOCGBIT(ev, KEY_MAX), buf)
     except IOError:
-        print 'Whoops!'
-        yield None
-        return
+        #print >>sys.stderr, 'Whoops!', rev_events[ev]
+        return None
 
     v = struct.unpack('@%dL' % _ll, buf)
     del buf
 
+    r = []
     for j in range(0, KEY_MAX):
         if test_bit(j, v):
-            yield j
+            r.append(j)
 
-    return
+    return r
+
+
+def copy_event(estr):
+    e = ctypes.cast(estr, ctypes.POINTER(input_event))
+    ev = e.contents
+
+    return input_event(ev.time, ev.type, ev.code, ev.value)
+
+class InputDevice(object):
+
+    def __init__(self, path):
+        self._f = open(path)
+
+    def get_version(self):
+        return get_input_version(self._f)
+
+    def get_name(self):
+        return get_input_name(self._f)
+
+    def get_exposed_events(self):
+        d = dict()
+        for k, v in events.iteritems():
+            l = get_keys(self._f, v)
+            if l:
+                d[k] = []
+                for ev in l:
+                    try:
+                        d[k].append(event_keys[v][ev])
+                    except KeyError:
+                        pass
+
+        return d
+
+    def next_event(self):
+        estr = self._f.read(ctypes.sizeof(input_event))
+        return copy_event(estr)
+
+    def get_fd(self):
+        return fd
+
+
+    def __del__(self):
+        self._f.close()
 
 
 def open_uinput():
@@ -59,7 +101,7 @@ def open_uinput():
             return None
     return f
 
-def create_uinput_device(name, specs):
+def write_uinput_device_info(name):
     """
     Create uinput device
     """
@@ -97,8 +139,12 @@ def free_uinput_device(f):
 class UInputDevice(object):
 
     def __init__(self, name, specs):
-        self.f = create_uinput_device(name, specs)
+        # TODO: Other methods for specs etc
+        # TODO: Maybe don't create the device yet; add a seperate method?
+        # TODO: Take inspiration from the config.h files ! Also allow using
+        # direct methods / programming it rather than just the dict as config
+        self._f = write_uinput_device_info(name)
 
     def __del__(self):
-        free_uinput_device(self.f)
+        free_uinput_device(self._f)
 
