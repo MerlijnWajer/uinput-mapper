@@ -1,14 +1,14 @@
-import cinput, linux_uinput, ctypes, fcntl, os
+import linux_uinput, ctypes, fcntl, os
 
 
 from cinput import *
 
 def handle_specs(f, s):
-    print 'ioctl:', fcntl.ioctl(f, UI_SET_EVBIT, cinput.EV_KEY)
-    print 'ioctl:', fcntl.ioctl(f, UI_SET_KEYBIT, cinput.KEY_UP)
+    print 'ioctl:', fcntl.ioctl(f, UI_SET_EVBIT, EV_KEY)
+    print 'ioctl:', fcntl.ioctl(f, UI_SET_KEYBIT, KEY_UP)
 
 
-d = cinput.UInputDevice('Example input device', None)
+d = UInputDevice('Example input device', None)
 
 import time
 time.sleep(5)

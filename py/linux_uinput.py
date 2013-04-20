@@ -24,6 +24,18 @@ UI_SET_PHYS = IOW(UINPUT_IOCTL_BASE, 108, '@i')
 UI_SET_SWBIT = IOW(UINPUT_IOCTL_BASE, 109, '@i')
 UI_SET_PROPBIT = IOW(UINPUT_IOCTL_BASE, 110, '@i')
 
+# TODO: Lacking PHYS and PROP
+evbits = {
+    linux_input.EV_KEY : UI_SET_KEYBIT,
+    linux_input.EV_REL : UI_SET_RELBIT,
+    linux_input.EV_ABS : UI_SET_ABSBIT,
+    linux_input.EV_MSC : UI_SET_MSCBIT,
+    linux_input.EV_LED : UI_SET_LEDBIT,
+    linux_input.EV_SND : UI_SET_SNDBIT,
+    linux_input.EV_FF  : UI_SET_FFBIT,
+    linux_input.EV_SW  : UI_SET_SWBIT
+}
+
 # TODO
 #define UI_BEGIN_FF_UPLOAD  _IOWR(UINPUT_IOCTL_BASE, 200, struct uinput_ff_upload)
 #define UI_END_FF_UPLOAD    _IOW(UINPUT_IOCTL_BASE, 201, struct uinput_ff_upload)

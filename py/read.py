@@ -15,10 +15,6 @@ for k, v in d.iteritems():
 
 while True:
     ev = f.next_event()
-    #estr = f._f.read(ctypes.sizeof(input_event))
-
-    #e = ctypes.cast(estr, ctypes.POINTER(input_event))
-    #ev = e.contents
 
     try:
         print ev.time.tv_sec, ev.time.tv_usec

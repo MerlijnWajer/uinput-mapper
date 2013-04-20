@@ -48,6 +48,10 @@ def get_keys(f, ev):
 
 
 def copy_event(estr):
+    """
+    Copy event from a string returned by read().
+    We return a copy because the string will probably be freed.
+    """
     e = ctypes.cast(estr, ctypes.POINTER(input_event))
     ev = e.contents
 
@@ -56,7 +60,7 @@ def copy_event(estr):
 class InputDevice(object):
 
     def __init__(self, path):
-        self._f = open(path)
+        self._f = os.open(path, os.O_RDONLY)
 
     def get_version(self):
         return get_input_version(self._f)
@@ -79,7 +83,7 @@ class InputDevice(object):
         return d
 
     def next_event(self):
-        estr = self._f.read(ctypes.sizeof(input_event))
+        estr = os.read(self._f, ctypes.sizeof(input_event))
         return copy_event(estr)
 
     def get_fd(self):
@@ -87,7 +91,7 @@ class InputDevice(object):
 
 
     def __del__(self):
-        self._f.close()
+        os.close(self._f)
 
 
 def open_uinput():
@@ -144,6 +148,15 @@ class UInputDevice(object):
         # TODO: Take inspiration from the config.h files ! Also allow using
         # direct methods / programming it rather than just the dict as config
         self._f = write_uinput_device_info(name)
+
+    def expose_event(evt, evk):
+        evbit = evbits[ev]
+        fcntl.ioctl(self._f, evbit, evk)
+
+    def fire_event(ev):
+        """
+        """
+        os.write(self._f, buffer(ev)[:])
 
     def __del__(self):
         free_uinput_device(self._f)
