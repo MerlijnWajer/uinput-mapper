@@ -4,18 +4,19 @@ from cinput import *
 
 clone = True
 
-passthrough = lambda x: -x*2
+overrule = lambda x: -x*2
+passthrough = lambda x: x
 config = {
         EV_REL : {
             REL_X : {
                 'type' : EV_REL,
                 'code' : REL_X,
-                'value': passthrough
+                'value': overrule
             },
             REL_Y : {
                 'type': EV_REL,
                 'code': REL_Y,
-                'value' : passthrough
+                'value' : overrule
             }
         },
         EV_KEY : {
@@ -83,27 +84,3 @@ while True:
 
     except KeyError:
        pass
-
-# Config
-dev = {
-   "input_devices" : [
-        ("/dev/input/event3", "keyboard1"),
-   ],
-   "type" : "mouse", # "mixed" "mouse" "keyboard" "joystick" "clone"?
-   "keymap" : {
-       "any" : { # From
-           EV_KEY : {
-               KEY_UP : {
-                    "type" : EV_REL,
-                    "key" : REL_X,
-                    "value" : lambda x: -x*10
-               },
-               KEY_DOWN : {
-                    "type": EV_REL,
-                    "key": REL_X,
-                    "value" : lambda x: x*10
-               }
-           }
-       },
-   }
-}
