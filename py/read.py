@@ -18,7 +18,7 @@ while True:
 
     try:
         print ev.time.tv_sec, ev.time.tv_usec
-        s = '%s %s %d' % (rev_events[ev.type], event_keys[ev.type][ev.code], ev.value)
+        s = '%s %s %d' % (rev_events[ev.type], rev_event_keys[ev.type][ev.code], ev.value)
         print 'Event type:', s
     except KeyError:
        pass

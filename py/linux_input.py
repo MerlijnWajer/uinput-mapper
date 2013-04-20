@@ -7,27 +7,12 @@ from gen import input_constants_dict as icd
 for k, v in icd.iteritems():
     locals()[k] = v
 
-
 rdict = lambda x: dict(map(lambda (k, v): (v, k), x.iteritems()))
 
 events = dict(filter(lambda (k, v): k in ["EV_SYN", "EV_KEY", "EV_REL",
     "EV_ABS", "EV_MSC", "EV_SW", "EV_LED", "EV_SND", "EV_REP",
     "EV_FF", "EV_PWR", "EV_FF_STATUS"], icd.iteritems()))
 rev_events = rdict(events)
-
-
-# event sets
-"""
-static const char * const * const names[EV_MAX + 1] = {
-	[0 ... EV_MAX] = NULL,
-	[EV_SYN] = events,			[EV_KEY] = keys,
-	[EV_REL] = relatives,			[EV_ABS] = absolutes,
-	[EV_MSC] = misc,			[EV_LED] = leds,
-	[EV_SND] = sounds,			[EV_REP] = repeats,
-	[EV_SW] = switches,
-	[EV_FF] = force,			[EV_FF_STATUS] = forcestatus,
-};
-"""
 
 filter_event = lambda c: dict(filter(lambda (k, v): c(k), icd.iteritems()))
 
@@ -58,11 +43,28 @@ rev_repeats = rdict(repeats)
 switches = filter_event(lambda x: x.startswith("SW_"))
 rev_switches = rdict(switches)
 
-del rdict
 
 force, forcestatus = {}, {}
+rev_force = rdict(force)
+rev_forcestatus = rdict(forcestatus)
+
+del rdict
 
 event_keys = {
+        EV_SYN: syn,
+        EV_KEY: keys,
+        EV_REL: rel,
+        EV_ABS: absaxes,
+        EV_MSC: misc,
+        EV_LED: leds,
+        EV_SND: sounds,
+        EV_REP: repeats,
+        EV_SW:  switches,
+        EV_FF:  force,
+        EV_FF_STATUS: forcestatus
+}
+
+rev_event_keys = {
         EV_SYN: rev_syn,
         EV_KEY: rev_keys,
         EV_REL: rev_rel,
@@ -72,10 +74,9 @@ event_keys = {
         EV_SND: rev_sounds,
         EV_REP: rev_repeats,
         EV_SW:  rev_switches,
-        EV_FF:  force,
-        EV_FF_STATUS: forcestatus
+        EV_FF:  rev_force,
+        EV_FF_STATUS: rev_forcestatus
 }
-
 
 class timeval(ctypes.Structure):
     _fields_ = [("tv_sec", ctypes.c_long), ("tv_usec", ctypes.c_long)]

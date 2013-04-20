@@ -68,7 +68,10 @@ class InputDevice(object):
     def get_name(self):
         return get_input_name(self._f)
 
+    # TODO: Maybe do not export keys?
     def get_exposed_events(self):
+        """
+        """
         d = dict()
         for k, v in events.iteritems():
             l = get_keys(self._f, v)
@@ -76,7 +79,7 @@ class InputDevice(object):
                 d[k] = []
                 for ev in l:
                     try:
-                        d[k].append(event_keys[v][ev])
+                        d[k].append(rev_event_keys[v][ev])
                     except KeyError:
                         pass
 
@@ -91,7 +94,8 @@ class InputDevice(object):
 
 
     def __del__(self):
-        os.close(self._f)
+        if hasattr(self, '_f'):
+            os.close(self._f)
 
 
 def open_uinput():
@@ -105,15 +109,10 @@ def open_uinput():
             return None
     return f
 
-def write_uinput_device_info(name):
+def write_uinput_device_info(f, name):
     """
     Create uinput device
     """
-    f = open_uinput()
-
-    if not f:
-        print 'Failed to open uinput'
-        return None
 
     # Add keys, etc
     #handle_specs(f, specs)
@@ -142,22 +141,28 @@ def free_uinput_device(f):
 
 class UInputDevice(object):
 
-    def __init__(self, name, specs):
-        # TODO: Other methods for specs etc
-        # TODO: Maybe don't create the device yet; add a seperate method?
-        # TODO: Take inspiration from the config.h files ! Also allow using
-        # direct methods / programming it rather than just the dict as config
-        self._f = write_uinput_device_info(name)
+    def __init__(self):
+        self._f = open_uinput()
+        if not self._f:
+            print 'Failed to open uinput'
+            raise OSError
 
-    def expose_event(evt, evk):
-        evbit = evbits[ev]
+    def setup(self, name):
+        write_uinput_device_info(self._f, name)
+
+    def expose_event_type(self, evt):
+        fcntl.ioctl(self._f, UI_SET_EVBIT, evt)
+
+    def expose_event(self, evt, evk):
+        evbit = evbits[evt]
         fcntl.ioctl(self._f, evbit, evk)
 
-    def fire_event(ev):
+    def fire_event(self, ev):
         """
         """
         os.write(self._f, buffer(ev)[:])
 
     def __del__(self):
-        free_uinput_device(self._f)
+        if hasattr(self, '_f'):
+            free_uinput_device(self._f)
 
