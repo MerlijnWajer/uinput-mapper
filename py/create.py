@@ -1,10 +1,6 @@
 import linux_uinput, ctypes, fcntl, os, sys
-
 from cinput import *
-
 from mapper import KeyMapper, parse_conf
-
-
 from example_conf import config
 
 clone = False
@@ -15,7 +11,6 @@ d = UInputDevice()
 if clone:
     conf = parse_conf(f)
     m = KeyMapper(conf)
-
 else:
     m = KeyMapper(config)
 

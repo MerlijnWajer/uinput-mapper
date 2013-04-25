@@ -97,6 +97,9 @@ class InputDevice(object):
         if hasattr(self, '_f'):
             os.close(self._f)
 
+class InputDeviceStream(object):
+    pass
+
 
 def open_uinput():
     try:
