@@ -129,12 +129,14 @@ int scan_device(char *f, int nfd) {
                         ioctl(fd, EVIOCGBIT(i, KEY_MAX), bit[i]);
                         for (j = 0; j < KEY_MAX; j++)
                                 if (test_bit(j, bit[i])) {
-                                        long kbit;
+                                        long kbit = 0;
                                         switch (i) {
                                             case EV_KEY: kbit = UI_SET_KEYBIT; break;
                                             case EV_REL: kbit = UI_SET_RELBIT; break;
                                             case EV_ABS: kbit = UI_SET_ABSBIT; break;
                                         }
+                                        if (!kbit)
+                                            continue;
 
                                         printf("Setting key: %d\n", j);
                                         printf("ioctl: %d\n", ioctl(nfd, kbit, j));
