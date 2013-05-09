@@ -15,7 +15,8 @@ def parse_conf(f):
             conf[t][tt] = {
                 'type' : t,
                 'code' : tt,
-                'value' : lambda x: x
+                'value' : None
+                #'value' : lambda x: x
             }
 
     return conf
@@ -32,7 +33,10 @@ class KeyMapper(object):
                 info = typemaps[ev.code]
                 ev.type = info['type']
                 ev.code = info['code']
-                ev.value = info['value'](ev.value)
+                if info['value'] is not None:
+                    ev.value = info['value'](ev.value)
+                else:
+                    ev.value = ev.value
 
         return ev
 
