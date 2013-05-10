@@ -1,5 +1,6 @@
 import cinput
 
+# XXX: Also parse name, etc
 def parse_conf(f):
     conf = {}
     e = f.get_exposed_events()
