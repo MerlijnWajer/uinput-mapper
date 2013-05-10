@@ -1,28 +1,34 @@
 from cinput import *
 
+# Approx
+
+# top left: (300, 3500)
+# bottom left: 300, 300)
+
+# top right: (3000, 3700)
+# bottom right: (3880, 430)
+
+w = 1920.
+h = 1080.
+
+rx1 = 300.
+ry1 = 200.
+
+rx2 = 3800.
+ry2 = 4000.
+
 def transform_x(x):
-    print 'old y', x
+    x -= rx1
+    x *= w / (rx2 - rx1)
 
-    # offset
-    x -= 200
-
-    x = int(x / (3800. / 1366.))
-    #x = int(x / (3800. / 1920.))
-    print 'new x', x
-    return x
+    return int(x)
 
 def transform_y(y):
-   print 'old y', y
+    y = ry2 - y
+    y -= ry1
+    y *= h / (rx2 - rx1)
 
-   # invert
-   y = 3800 - y
-
-   # offset
-   y -= 200
-   y = int(y / (3800. / 768.))
-   #y = int(y / (3800. / 1080.))
-   print 'new y', y
-   return y
+    return int(y)
 
 config = {
         EV_ABS : {
