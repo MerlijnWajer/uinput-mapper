@@ -14,22 +14,19 @@ parser = optparse.OptionParser(description='Read input devices. '
         'TODO')
 parser.add_option('-D', '--dump', action='store_false',
         default=True, help='Dump will marshall all the events to stdout')
-parser.add_option('-i', '--input-file', action='append',
-        type=str, default=[],
-        help='Read events from this input device')
 
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
-args, _ = parser.parse_args()
+args, input_file = parser.parse_args()
 
 
-if len(args.input_file) == 0:
+if len(input_file) == 0:
     parser.print_help()
     exit(0)
 
 # TODO: Support multiple input files + epoll; InputDevices?
-f = InputDevice(args.input_file[0])
+f = InputDevice(input_file[0])
 
 config = parse_conf(f)
 m = KeyMapper(config)
