@@ -21,7 +21,7 @@ parser.add_option('-i', '--input-file', action='append',
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
-args = parser.parse_args()
+args, _ = parser.parse_args()
 
 
 if len(args.input_file) == 0:

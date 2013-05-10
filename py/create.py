@@ -23,7 +23,7 @@ parser.add_option('-c', '--config', type=str, action='append',
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
-args = parser.parse_args()
+args, _ = parser.parse_args()
 
 # Unpickle from stdin ; currently this is the default and only way
 f = pickle.Unpickler(sys.stdin)
@@ -31,9 +31,8 @@ f = pickle.Unpickler(sys.stdin)
 conf = f.load()
 
 for path in args.config:
-    if path:
-        config = imp.load_source('', path).config
-        conf.update(config)
+    config = imp.load_source('', path).config
+    conf.update(config)
 
 m = KeyMapper(conf)
 
