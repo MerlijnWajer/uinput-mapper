@@ -2,7 +2,6 @@
 import linux_uinput, ctypes, fcntl, os, sys
 from cinput import *
 from mapper import KeyMapper, parse_conf
-from example_conf import config
 from linux_input import timeval, input_event
 
 try:
