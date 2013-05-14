@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import linux_uinput, ctypes, fcntl, os, sys
 from cinput import *
 from mapper import KeyMapper, parse_conf
@@ -10,7 +11,7 @@ except ImportError:
 
 import optparse
 
-_usage = 'python read.py /dev/input/event<0> ... /dev/input/event<N>'
+_usage = 'input-read /dev/input/event<0> ... /dev/input/event<N>'
 parser = optparse.OptionParser(description='Read input devices.',
         usage = _usage,
         version='0.01')
