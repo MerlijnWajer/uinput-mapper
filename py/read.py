@@ -10,8 +10,10 @@ except ImportError:
 
 import optparse
 
-parser = optparse.OptionParser(description='Read input devices. '
-        'TODO')
+_usage = 'python read.py /dev/input/event<0> ... /dev/input/event<N>'
+parser = optparse.OptionParser(description='Read input devices.',
+        usage = _usage,
+        version='0.01')
 parser.add_option('-D', '--dump', action='store_false',
         default=True, help='Dump will marshall all the events to stdout')
 

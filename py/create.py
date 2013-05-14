@@ -4,18 +4,19 @@ from mapper import KeyMapper, parse_conf
 from example_conf import config
 from linux_input import timeval, input_event
 
-import imp
-
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
 
-
+import imp
 import optparse
 
-parser = optparse.OptionParser(description='Create input devices. '
-        'TODO')
+_usage = 'python create.py /path/to/config1 ... /path/to/configN'
+parser = optparse.OptionParser(description='Create input devices.',
+        usage=_usage,
+        version='0.01'
+        )
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
