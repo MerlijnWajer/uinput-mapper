@@ -16,10 +16,6 @@ import optparse
 
 parser = optparse.OptionParser(description='Create input devices. '
         'TODO')
-#parser.add_option('-c', '--config', type=str, action='append',
-#        default=[],
-#        help='Merge configuration file with default '
-#        'configuration (allowed to be used multiple times)')
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
@@ -29,19 +25,10 @@ args, cfg = parser.parse_args()
 f = pickle.Unpickler(sys.stdin)
 
 conf = f.load()
-print conf
 
 for path in cfg:
-    config = imp.load_source('', path).config
-
-    # XXX: We cannot just use update; as it will override everything in say EV_TE
-    for k, v in config.iteritems():
-        if k in conf:
-            conf[k].update(v)
-        else:
-            conf[k] = v
-    #conf.update(config)
-print conf
+    config_merge = imp.load_source('', path).config_merge
+    config_merge(conf)
 
 m = KeyMapper(conf)
 

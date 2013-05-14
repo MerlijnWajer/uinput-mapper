@@ -44,3 +44,20 @@ config = {
             }
         }
 }
+
+def config_merge(c):
+    # XXX: We cannot just use update; as it will override everything in say EV_KEY
+    for k, v in config.iteritems():
+        if k in c:
+            c[k].update(v)
+        else:
+            c[k] = v
+
+    # Uncomment this to make touch click too
+    c[EV_KEY][BTN_TOUCH] = {
+            'type' : EV_KEY,
+            'code' : BTN_TOUCH,
+            'value' : lambda x: 0
+    }
+
+
