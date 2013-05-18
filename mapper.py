@@ -71,7 +71,7 @@ class KeyMapper(object):
         """
         _type = ev.type
 
-        if _type in self._config:
+        if (fd, _type) in self._config:
             typemaps = self._config[(fd, _type)]
             if ev.code in typemaps:
                 info = typemaps[ev.code]

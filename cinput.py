@@ -119,10 +119,10 @@ class InputDevice(object):
 def open_uinput():
     try:
         f = os.open('/dev/uinput',  os.O_WRONLY | os.O_NONBLOCK)
-    except IOError:
+    except OSError:
         try:
             f = os.open('/dev/input/uinput', os.O_WRONLY | os.O_NONBLOCK)
-        except IOError:
+        except OSError:
             print 'FAIL MUCH?'
             return None
     return f

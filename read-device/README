@@ -1,3 +1,0 @@
-Use:  evtest /dev/input/by-id/usb-Logitech_USB-PS_2_Optical_Mouse-event-mouse
-
-Check: http://cgit.freedesktop.org/evtest/tree/evtest.c#n739
