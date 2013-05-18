@@ -70,6 +70,7 @@ class KeyMapper(object):
         fd *ofd*.
         """
         _type = ev.type
+        ofd = fd
 
         if (fd, _type) in self._config:
             typemaps = self._config[(fd, _type)]
@@ -81,8 +82,6 @@ class KeyMapper(object):
                     ev.value = info['value'](ev.value)
                 else:
                     ev.value = ev.value
-        else:
-            ofd = fd
 
         return ofd, ev
 
