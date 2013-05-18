@@ -90,7 +90,7 @@ class InputDevice(object):
         return copy_event(estr)
 
     def get_fd(self):
-        return fd
+        return self._f
 
 
     def __del__(self):

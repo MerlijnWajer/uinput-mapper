@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 import linux_uinput, ctypes, fcntl, os, sys
+import select
+
 from cinput import *
-from mapper import KeyMapper, parse_conf
+from mapper import KeyMapper, parse_conf, pretty_conf_print
 
 try:
     import cPickle as pickle
@@ -27,46 +29,71 @@ if len(input_file) == 0:
     parser.print_help()
     exit(0)
 
-# TODO: Support multiple input files + epoll; InputDevices?
-f = InputDevice(input_file[0])
+fs = map(InputDevice, input_file)
 
-config = parse_conf(f)
-m = KeyMapper(config)
+config = {}
+for idx, f in enumerate(fs):
+    c = parse_conf(f, idx)
+
+    config.update(c)
+
+pretty_conf_print(config)
+
+p = select.epoll()
+for f in fs:
+    p.register(f.get_fd(), select.EPOLLIN)
 
 if args.dump:
-    print 'Version:', f.get_version()
-    print f.get_name()
+    for f in fs:
+        print 'Version:', f.get_version()
+        print f.get_name()
 
-    d = f.get_exposed_events()
-    for k, v in d.iteritems():
-        print k + ':', ', '.join(v)
+        d = f.get_exposed_events()
+        for k, v in d.iteritems():
+            print k + ':', ', '.join(v)
 
 else:
     p = pickle.Pickler(sys.stdout)
+
+    p.dump(len(fs))
 
     p.dump(config)
 
     sys.stdout.flush()
 
+i = 0
 while True:
-    # TODO: Poll multiple files ; add file description (not descriptor...)
-    # f, ev = fs.next_event()
-    ev = f.next_event()
+    events = p.poll()
 
-    if args.dump:
-        try:
-            print ev.time.tv_sec, ev.time.tv_usec
-            s = '%s %s %d' % (rev_events[ev.type], rev_event_keys[ev.type][ev.code], ev.value)
-            print 'Event type:', s
-        except KeyError:
-           pass
+    for e in events:
+        fd, ev_mask = e
 
-    else:
-        if not args.compat:
-            p.dump(ev)
+        if not ev_mask & select.EPOLLIN:
+            continue
+
+        # Lets undo that epoll speedup ;-)
+        for idx, _ in enumerate(fs):
+            if _.get_fd() == fd:
+                f = _
+                i = idx
+
+        ev = f.next_event()
+
+        if args.dump:
+            try:
+                print i, ev.time.tv_sec, ev.time.tv_usec
+                s = '%s %s %d' % (rev_events[ev.type], rev_event_keys[ev.type][ev.code], ev.value)
+                print 'Event type:', s
+            except KeyError:
+               pass
+
         else:
-            # Use this rather than the line above if you use an old python version (also
-            # edit create.py)
-            p.dump((ev.time.tv_sec, ev.time.tv_usec, ev.type, ev.code, ev.value))
+            if not args.compat:
+                p.dump((i, ev))
+            else:
+                # Use this rather than the line above if you use an old python version (also
+                # edit create.py)
+                p.dump((i, (ev.time.tv_sec, ev.time.tv_usec, ev.type, ev.code,
+                    ev.value)))
 
-        sys.stdout.flush()
+            sys.stdout.flush()
