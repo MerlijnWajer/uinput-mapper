@@ -38,10 +38,13 @@ for idx, f in enumerate(fs):
 
     config.update(c)
 
+poll_obj, poll_mask = (select.poll, select.POLLIN) if args.compat else \
+        (select.epoll, select.EPOLLIN)
+
 # Add all devices to epoll
-pp = select.epoll()
+pp = poll_obj()
 for f in fs:
-    pp.register(f.get_fd(), select.EPOLLIN)
+    pp.register(f.get_fd(), poll_mask)
 
 
 # Human readable info
@@ -70,7 +73,7 @@ while True:
     for e in events:
         fd, ev_mask = e
 
-        if not ev_mask & select.EPOLLIN:
+        if not ev_mask & poll_mask:
             continue
 
         # Lets undo that epoll speedup ;-) FIXME XXX
