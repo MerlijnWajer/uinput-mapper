@@ -35,28 +35,42 @@ def pretty_conf_print(c):
                 cinput.rev_events[n_ev_t],
                 cinput.rev_event_keys[n_ev_t][vv['code']])
 
+def get_exported_device_count(c):
+    m = 0
+    for _, v in c.iteritems():
+        for _, o in v.iteritems():
+            m = max(m, o['type'][0])
+
+    return m + 1
+
 
 class KeyMapper(object):
     def __init__(self, config):
         self._config = config
 
-    def map_event(self, ev):
+    def map_event(self, ev, fd):
         _type = ev.type
+
         if _type in self._config:
-            typemaps = self._config[_type]
+            typemaps = self._config[(fd, _type)]
             if ev.code in typemaps:
                 info = typemaps[ev.code]
-                ev.type = info['type']
+                ofd, ev.type = info['type']
                 ev.code = info['code']
                 if info['value'] is not None:
                     ev.value = info['value'](ev.value)
                 else:
                     ev.value = ev.value
+        else:
+            ofd = fd
 
-        return ev
+        return ofd, ev
 
-    def expose(self, d):
-        for evt, v in self._config.iteritems():
+    def expose(self, d, fd):
+        for (n, evt), v in self._config.iteritems():
             for code, dat in v.iteritems():
-                d.expose_event_type(dat['type'])
-                d.expose_event(dat['type'], dat['code'])
+                ofd, t = dat['type']
+                if ofd != fd:
+                    continue
+                d.expose_event_type(t)
+                d.expose_event(t, dat['code'])

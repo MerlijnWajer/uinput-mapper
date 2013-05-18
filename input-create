@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import linux_uinput, ctypes, fcntl, os, sys
 from cinput import *
-from mapper import KeyMapper, parse_conf
+from mapper import KeyMapper, parse_conf, pretty_conf_print, \
+    get_exported_device_count
 from linux_input import timeval, input_event
 
 try:
@@ -23,29 +24,43 @@ parser.add_option('-C', '--compat', action='store_true',
 args, cfg = parser.parse_args()
 
 # Unpickle from stdin ; currently this is the default and only way
-f = pickle.Unpickler(sys.stdin)
+in_f = pickle.Unpickler(sys.stdin)
 
-conf = f.load()
+nifd = in_f.load()
+
+print 'Got', nifd, 'inputs'
+
+conf = in_f.load()
 
 for path in cfg:
     config_merge = imp.load_source('', path).config_merge
     config_merge(conf)
 
+pretty_conf_print(conf)
+
 m = KeyMapper(conf)
 
-d = UInputDevice()
-m.expose(d)
-d.setup('Example input device')
+# TODO: Get amount of uinput devices to export
 
+nofd = get_exported_device_count(conf)
+
+
+ofs = []
+for f in xrange(nofd):
+    d = UInputDevice()
+    m.expose(d, f)
+    d.setup('Example input device')
+    ofs.append(d)
 
 while True:
     if not args.compat:
-        ev = f.load()
+        fd, ev = in_f.load()
     else:
-        ev_p = f.load()
+        fd, ev_p = in_f.load()
         ti = timeval(ev_p[0], ev_p[1])
         ev = input_event(ti, ev_p[2], ev_p[3], ev_p[4])
 
-    ev = m.map_event(ev)
+    idx, ev = m.map_event(ev, fd)
+    d = ofs[idx]
 
     d.fire_event(ev)

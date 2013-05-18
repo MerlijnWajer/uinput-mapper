@@ -3,7 +3,7 @@ import linux_uinput, ctypes, fcntl, os, sys
 import select
 
 from cinput import *
-from mapper import KeyMapper, parse_conf, pretty_conf_print
+from mapper import KeyMapper, parse_conf
 
 try:
     import cPickle as pickle
@@ -37,11 +37,9 @@ for idx, f in enumerate(fs):
 
     config.update(c)
 
-pretty_conf_print(config)
-
-p = select.epoll()
+pp = select.epoll()
 for f in fs:
-    p.register(f.get_fd(), select.EPOLLIN)
+    pp.register(f.get_fd(), select.EPOLLIN)
 
 if args.dump:
     for f in fs:
@@ -63,7 +61,7 @@ else:
 
 i = 0
 while True:
-    events = p.poll()
+    events = pp.poll()
 
     for e in events:
         fd, ev_mask = e
