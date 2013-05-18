@@ -29,6 +29,9 @@ _ll = _nbits(KEY_MAX)
 test_bit = lambda j, v: (v[j / _bpl] >> (j % _bpl)) & 1
 
 def get_keys(f, ev):
+    """
+    Get keys of type *f* from a specific input device *f*.
+    """
     buf = array.array('L', [0L] * _ll)
     try:
         fcntl.ioctl(f, EVIOCGBIT(ev, KEY_MAX), buf)
@@ -58,19 +61,28 @@ def copy_event(estr):
     return input_event(ev.time, ev.type, ev.code, ev.value)
 
 class InputDevice(object):
+    """
+    Class for reading input devices in /dev/input/
+    """
 
     def __init__(self, path):
         self._f = os.open(path, os.O_RDONLY)
 
     def get_version(self):
+        """
+        Returns the version of the input device.
+        """
         return get_input_version(self._f)
 
     def get_name(self):
+        """
+        Returns the name of the input device.
+        """
         return get_input_name(self._f)
 
-    # TODO: Maybe do not export keys?
     def get_exposed_events(self):
         """
+        Returns all the keys exposed by this input device.
         """
         d = dict()
         for k, v in events.iteritems():
@@ -86,19 +98,22 @@ class InputDevice(object):
         return d
 
     def next_event(self):
+        """
+        Read the next event from the input device
+        """
         estr = os.read(self._f, ctypes.sizeof(input_event))
         return copy_event(estr)
 
     def get_fd(self):
+        """
+        Returns the underlying fd.
+        """
         return self._f
 
 
     def __del__(self):
         if hasattr(self, '_f'):
             os.close(self._f)
-
-class InputDeviceStream(object):
-    pass
 
 
 def open_uinput():
@@ -144,6 +159,11 @@ def free_uinput_device(f):
 
 class UInputDevice(object):
 
+    """
+    Class to create input devices using /dev/(input/)?uinput
+
+    """
+
     def __init__(self):
         self._f = open_uinput()
         if not self._f:
@@ -151,17 +171,27 @@ class UInputDevice(object):
             raise OSError
 
     def setup(self, name):
+        """
+        Writes initial data and transforms the fd into the input device
+        """
         write_uinput_device_info(self._f, name)
 
     def expose_event_type(self, evt):
+        """
+        Exposes a specific event type.
+        """
         fcntl.ioctl(self._f, UI_SET_EVBIT, evt)
 
     def expose_event(self, evt, evk):
+        """
+        Exposes an event; make sure the event type is exposed as well.
+        """
         evbit = evbits[evt]
         fcntl.ioctl(self._f, evbit, evk)
 
     def fire_event(self, ev):
         """
+        Fire a new input event.
         """
         os.write(self._f, buffer(ev)[:])
 

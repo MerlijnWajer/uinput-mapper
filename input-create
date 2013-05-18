@@ -20,31 +20,34 @@ parser = optparse.OptionParser(description='Create input devices.',
         )
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
+parser.add_option('-v', '--verbose', action='store_true',
+        help='Enable verbose mode')
 
 args, cfg = parser.parse_args()
 
 # Unpickle from stdin ; currently this is the default and only way
 in_f = pickle.Unpickler(sys.stdin)
 
+# Read input device count
 nifd = in_f.load()
 
-print 'Got', nifd, 'inputs'
-
+# Read configuration
 conf = in_f.load()
 
+# Allow configurations to change our current configuration
 for path in cfg:
     config_merge = imp.load_source('', path).config_merge
     config_merge(conf)
 
-pretty_conf_print(conf)
+if args.verbose:
+    pretty_conf_print(conf)
 
 m = KeyMapper(conf)
 
-# TODO: Get amount of uinput devices to export
-
+# Get number of output devices (determined from conf)
 nofd = get_exported_device_count(conf)
 
-
+# Create and expose uinput devices
 ofs = []
 for f in xrange(nofd):
     d = UInputDevice()
@@ -52,6 +55,7 @@ for f in xrange(nofd):
     d.setup('Example input device')
     ofs.append(d)
 
+# Map events
 while True:
     if not args.compat:
         fd, ev = in_f.load()

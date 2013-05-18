@@ -1,8 +1,17 @@
 # encoding: utf-8
 import cinput
 
-# XXX: Also parse name, etc
+"""
+Module to help out with config parsing and input mapping
+"""
+
 def parse_conf(f, devname):
+    """
+    Reads in input devices and returns a config that contains all the events
+    exported by the device.
+
+    devname specificies the idx of this input device
+    """
     conf = {}
     e = f.get_exposed_events()
     for k, v in e.iteritems():
@@ -25,6 +34,9 @@ def parse_conf(f, devname):
 
 
 def pretty_conf_print(c):
+    """
+    Function to print an entire configuration
+    """
     for k, v in c.iteritems():
         print 'Input:', k[0], 'Type:', cinput.rev_events[k[1]]
         for kk, vv in v.iteritems():
@@ -36,6 +48,10 @@ def pretty_conf_print(c):
                 cinput.rev_event_keys[n_ev_t][vv['code']])
 
 def get_exported_device_count(c):
+    """
+    Iterate dictionary to find out how many devices are exported.
+    (Rather simple at the moment)
+    """
     m = 0
     for _, v in c.iteritems():
         for _, o in v.iteritems():
@@ -49,6 +65,10 @@ class KeyMapper(object):
         self._config = config
 
     def map_event(self, ev, fd):
+        """
+        Maps an event *ev* from fd *fd* to a possibly different event and output
+        fd *ofd*.
+        """
         _type = ev.type
 
         if _type in self._config:
@@ -67,6 +87,10 @@ class KeyMapper(object):
         return ofd, ev
 
     def expose(self, d, fd):
+        """
+        Expose exposes events to a uinput-device *d* with index *fd* from the
+        config passed to __init__.
+        """
         for (n, evt), v in self._config.iteritems():
             for code, dat in v.iteritems():
                 ofd, t = dat['type']

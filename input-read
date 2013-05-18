@@ -24,23 +24,27 @@ parser.add_option('-C', '--compat', action='store_true',
 
 args, input_file = parser.parse_args()
 
-
 if len(input_file) == 0:
     parser.print_help()
     exit(0)
 
+# Open input devices
 fs = map(InputDevice, input_file)
 
+# Create configuration
 config = {}
 for idx, f in enumerate(fs):
     c = parse_conf(f, idx)
 
     config.update(c)
 
+# Add all devices to epoll
 pp = select.epoll()
 for f in fs:
     pp.register(f.get_fd(), select.EPOLLIN)
 
+
+# Human readable info
 if args.dump:
     for f in fs:
         print 'Version:', f.get_version()
@@ -51,6 +55,7 @@ if args.dump:
             print k + ':', ', '.join(v)
 
 else:
+    # Dump initial information over pickle to stdout
     p = pickle.Pickler(sys.stdout)
 
     p.dump(len(fs))
@@ -59,7 +64,6 @@ else:
 
     sys.stdout.flush()
 
-i = 0
 while True:
     events = pp.poll()
 
@@ -69,7 +73,7 @@ while True:
         if not ev_mask & select.EPOLLIN:
             continue
 
-        # Lets undo that epoll speedup ;-)
+        # Lets undo that epoll speedup ;-) FIXME XXX
         for idx, _ in enumerate(fs):
             if _.get_fd() == fd:
                 f = _
@@ -80,7 +84,8 @@ while True:
         if args.dump:
             try:
                 print i, ev.time.tv_sec, ev.time.tv_usec
-                s = '%s %s %d' % (rev_events[ev.type], rev_event_keys[ev.type][ev.code], ev.value)
+                s = '%s %s %d' % (rev_events[ev.type],
+                        rev_event_keys[ev.type][ev.code], ev.value)
                 print 'Event type:', s
             except KeyError:
                pass
@@ -89,9 +94,7 @@ while True:
             if not args.compat:
                 p.dump((i, ev))
             else:
-                # Use this rather than the line above if you use an old python version (also
-                # edit create.py)
-                p.dump((i, (ev.time.tv_sec, ev.time.tv_usec, ev.type, ev.code,
-                    ev.value)))
+                p.dump((i, (ev.time.tv_sec, ev.time.tv_usec,
+                    ev.type, ev.code, ev.value)))
 
             sys.stdout.flush()
