@@ -59,5 +59,5 @@ class uinput_user_dev(ctypes.Structure):
         ("absmax", ctypes.c_int32 * linux_input.ABS_CNT),
         ("absmin", ctypes.c_int32 * linux_input.ABS_CNT),
         ("absfuzz", ctypes.c_int32 * linux_input.ABS_CNT),
-        ("absflac", ctypes.c_int32 * linux_input.ABS_CNT)
+        ("absflat", ctypes.c_int32 * linux_input.ABS_CNT)
     ]

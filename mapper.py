@@ -30,6 +30,16 @@ def parse_conf(f, devname):
                 #'value' : lambda x: x
             }
 
+            if t == cinput.EV_ABS:
+                p = f.get_absprop(tt)
+                conf[(devname, t)][tt]['prop'] = {
+                        'max' : p.maximum,
+                        'min' : p.minimum,
+                        'fuzz' : p.fuzz,
+                        'flat' : p.flat
+                }
+
+
     return conf
 
 
@@ -46,6 +56,11 @@ def pretty_conf_print(c):
             print ' → ([%d, %s], %s)' % (n_ev_d,
                 cinput.rev_events[n_ev_t],
                 cinput.rev_event_keys[n_ev_t][vv['code']])
+
+            if n_ev_t == cinput.EV_ABS:
+                print 'Properties: Max: %d Min: %d Fuzz: %d Flat: %d' % (
+                        vv['prop']['max'], vv['prop']['min'],
+                        vv['prop']['fuzz'], vv['prop']['flat'])
 
 def get_exported_device_count(c):
     """
@@ -97,3 +112,8 @@ class KeyMapper(object):
                     continue
                 d.expose_event_type(t)
                 d.expose_event(t, dat['code'])
+
+                if t == cinput.EV_ABS:
+                    p = dat['prop']
+                    d.set_absprop(dat['code'], _max=p['max'], _min=p['min'],
+                            fuzz=p['fuzz'], flat=p['flat'])

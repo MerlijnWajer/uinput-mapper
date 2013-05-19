@@ -34,6 +34,9 @@ nifd = in_f.load()
 # Read configuration
 conf = in_f.load()
 
+if args.verbose:
+    pretty_conf_print(conf)
+
 # Allow configurations to change our current configuration
 for path in cfg:
     config_merge = imp.load_source('', path).config_merge

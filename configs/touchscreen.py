@@ -31,14 +31,14 @@ def transform_y(y):
     return int(y)
 
 config = {
-        EV_ABS : {
+        (0, EV_ABS) : {
             ABS_X : {
-                'type' : EV_ABS,
+                'type' : (0, EV_ABS),
                 'code' : ABS_X,
                 'value' : transform_x
             },
             ABS_Y : {
-                'type' : EV_ABS,
+                'type' : (0, EV_ABS),
                 'code' : ABS_Y,
                 'value' : transform_y
             }
@@ -54,8 +54,8 @@ def config_merge(c):
             c[k] = v
 
     # Uncomment this to make touch click too
-    c[EV_KEY][BTN_TOUCH] = {
-            'type' : EV_KEY,
+    c[(0, EV_KEY)][BTN_TOUCH] = {
+            'type' : (0, EV_KEY),
             'code' : BTN_TOUCH,
             'value' : lambda x: 0
     }

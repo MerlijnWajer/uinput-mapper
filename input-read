@@ -3,7 +3,7 @@ import linux_uinput, ctypes, fcntl, os, sys
 import select
 
 from cinput import *
-from mapper import KeyMapper, parse_conf
+from mapper import KeyMapper, parse_conf, pretty_conf_print
 
 try:
     import cPickle as pickle
@@ -18,6 +18,8 @@ parser = optparse.OptionParser(description='Read input devices.',
         version='0.01')
 parser.add_option('-D', '--dump', action='store_false',
         default=True, help='Dump will marshall all the events to stdout')
+parser.add_option('-v', '--verbose', action='store_true',
+        default=False, help='Enable verbose mode (do not combine with -D)')
 
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
@@ -38,6 +40,9 @@ for idx, f in enumerate(fs):
 
     config.update(c)
 
+if args.verbose:
+    pretty_conf_print(config)
+
 poll_obj, poll_mask = (select.poll, select.POLLIN) if args.compat else \
         (select.epoll, select.EPOLLIN)
 
@@ -45,7 +50,6 @@ poll_obj, poll_mask = (select.poll, select.POLLIN) if args.compat else \
 pp = poll_obj()
 for f in fs:
     pp.register(f.get_fd(), poll_mask)
-
 
 # Human readable info
 if args.dump:

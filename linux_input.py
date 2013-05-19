@@ -89,13 +89,24 @@ class input_event(ctypes.Structure):
         ("value", ctypes.c_int32)
     ]
 
-class input_id (ctypes.Structure):
+class input_id(ctypes.Structure):
     _fields_ = [
         ("bustype", ctypes.c_uint16),
         ("vendor", ctypes.c_uint16),
         ("product", ctypes.c_uint16),
         ("version", ctypes.c_uint16),
     ]
+
+class input_absinfo(ctypes.Structure):
+    _fields_ = [
+        ("value", ctypes.c_int32),
+        ("minimum", ctypes.c_int32),
+        ("maximum", ctypes.c_int32),
+        ("fuzz", ctypes.c_int32),
+        ("flat", ctypes.c_int32),
+        ("resolution", ctypes.c_int32)
+    ]
+
 
 from ioctlhelp import IOR, IOW, IOC, IO, _IOC_READ
 
@@ -146,6 +157,7 @@ EVIOCGPROP = lambda _len: IOC(_IOC_READ, ord('E'), 0x09,
 # Get event bits
 EVIOCGBIT = lambda ev, _len: IOC(_IOC_READ, ord('E'), 0x20 + ev, _len)
 
+EVIOCGABS = lambda _abs: IOR(ord('E'), 0x40 + _abs, ctypes.sizeof(input_absinfo))
 #EVIOCGABS(abs)		_IOR('E', 0x40 + (abs), struct input_absinfo)	/* get abs value/limits */
 #EVIOCSABS(abs)		_IOW('E', 0xc0 + (abs), struct input_absinfo)	/* set abs value/limits */
 #

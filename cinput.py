@@ -9,8 +9,7 @@ def get_input_version(f):
     """
     buf = array.array('i', [0])
     r = fcntl.ioctl(f, EVIOCGVERSION, buf)
-    v = struct.unpack('@i', buf)[0]
-    del buf
+    v = buf.tolist()[0]
     return "%d.%d.%d" % ( v >> 16, (v >> 8) & 0xff, v & 0xff)
 
 def get_input_name(f, l=256):
@@ -19,9 +18,14 @@ def get_input_name(f, l=256):
     """
     buf = array.array('c', ' ' * l)
     r = fcntl.ioctl(f, EVIOCGNAME(l), buf)
-    v = struct.unpack('%ds' % l, buf)[0]
-    del buf
-    return v[:r]
+    return ''.join(buf.tolist()[:r])
+
+def read_abs_values(f, abs_ev):
+    buf = array.array('i', [0] * 6)
+
+    r = fcntl.ioctl(f, EVIOCGABS(abs_ev), buf)
+    val = input_absinfo(*buf.tolist())
+    return val
 
 _bpl = struct.calcsize('@L') * 8
 _nbits = lambda x: ((x-1) / _bpl) + 1
@@ -97,6 +101,9 @@ class InputDevice(object):
 
         return d
 
+    def get_absprop(self, absk):
+        return read_abs_values(self.get_fd(), absk)
+
     def next_event(self):
         """
         Read the next event from the input device
@@ -127,7 +134,7 @@ def open_uinput():
             return None
     return f
 
-def write_uinput_device_info(f, name):
+def write_uinput_device_info(uidev, f, name):
     """
     Create uinput device
     """
@@ -136,7 +143,6 @@ def write_uinput_device_info(f, name):
     #handle_specs(f, specs)
 
     # Allocate other info
-    uidev = uinput_user_dev()
 
     # TODO: Get from specs
     uidev.name = name
@@ -169,12 +175,13 @@ class UInputDevice(object):
         if not self._f:
             print 'Failed to open uinput'
             raise OSError
+        self.uidev = uinput_user_dev()
 
     def setup(self, name):
         """
         Writes initial data and transforms the fd into the input device
         """
-        write_uinput_device_info(self._f, name)
+        write_uinput_device_info(self.uidev, self._f, name)
 
     def expose_event_type(self, evt):
         """
@@ -188,6 +195,12 @@ class UInputDevice(object):
         """
         evbit = evbits[evt]
         fcntl.ioctl(self._f, evbit, evk)
+
+    def set_absprop(self, absk, _max=0, _min=0, fuzz=0, flat=0):
+        self.uidev.absmax[absk] = _max
+        self.uidev.absmin[absk] = _min
+        self.uidev.absfuzz[absk] = fuzz
+        self.uidev.absflat[absk] = flat
 
     def fire_event(self, ev):
         """
