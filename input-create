@@ -3,8 +3,8 @@ import ctypes, fcntl, os, sys
 
 import uinputmapper
 import uinputmapper.linux_uinput
-from uinputmappercinput import *
-from uinputmappermapper import KeyMapper, parse_conf, pretty_conf_print, \
+from uinputmapper.cinput import *
+from uinputmapper.mapper import KeyMapper, parse_conf, pretty_conf_print, \
     get_exported_device_count
 from uinputmapper.linux_input import timeval, input_event
 
