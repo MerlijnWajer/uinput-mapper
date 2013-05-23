@@ -1,9 +1,12 @@
 #!/usr/bin/env python
-import linux_uinput, ctypes, fcntl, os, sys
-from cinput import *
-from mapper import KeyMapper, parse_conf, pretty_conf_print, \
+import ctypes, fcntl, os, sys
+
+import uinputmapper
+import uinputmapper.linux_uinput
+from uinputmappercinput import *
+from uinputmappermapper import KeyMapper, parse_conf, pretty_conf_print, \
     get_exported_device_count
-from linux_input import timeval, input_event
+from uinputmapper.linux_input import timeval, input_event
 
 try:
     import cPickle as pickle

@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import linux_uinput, ctypes, fcntl, os, sys
+import ctypes, fcntl, os, sys
 import select
 
-from cinput import *
-from mapper import KeyMapper, parse_conf, pretty_conf_print
+import uinputmapper
+import uinputmapper.linux_uinput
+from uinputmapper.cinput import *
+from uinputmapper.mapper import KeyMapper, parse_conf, pretty_conf_print
 
 try:
     import cPickle as pickle
