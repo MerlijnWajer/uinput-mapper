@@ -2,7 +2,7 @@ import ctypes
 
 import struct
 
-from gen import input_constants_dict as icd
+from uinput_gen import input_constants_dict as icd
 
 for k, v in icd.iteritems():
     locals()[k] = v
