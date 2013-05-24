@@ -1,4 +1,4 @@
-from cinput import *
+from uinputmapper.cinput import *
 
 """
 Configuration for a simple Microsoft SideWinter Game Pad Pro USB version 1.0

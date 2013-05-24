@@ -1,4 +1,4 @@
-from cinput import *
+from uinputmapper.cinput import *
 
 # Approx
 
@@ -26,7 +26,7 @@ def transform_x(x):
 def transform_y(y):
     y = ry2 - y
     y -= ry1
-    y *= h / (rx2 - rx1)
+    y *= h / (rx2 - rx1) # shouldn't the x here be y?
 
     return int(y)
 
@@ -35,12 +35,24 @@ config = {
             ABS_X : {
                 'type' : (0, EV_ABS),
                 'code' : ABS_X,
-                'value' : transform_x
+                'value' : transform_x,
+                'prop' : {
+                    'max' : 3000,
+                    'min' : 200,
+                    'flat' : 0,
+                    'fuzz' : 0
+                }
             },
             ABS_Y : {
                 'type' : (0, EV_ABS),
                 'code' : ABS_Y,
-                'value' : transform_y
+                'value' : transform_y,
+                'prop' : {
+                    'max' : 3000,
+                    'min' : 200,
+                    'flat' : 0,
+                    'fuzz' : 0
+                }
             }
         }
 }
@@ -54,10 +66,10 @@ def config_merge(c):
             c[k] = v
 
     # Uncomment this to make touch click too
-    c[(0, EV_KEY)][BTN_TOUCH] = {
-            'type' : (0, EV_KEY),
-            'code' : BTN_TOUCH,
-            'value' : lambda x: 0
-    }
+    #c[(0, EV_KEY)][BTN_TOUCH] = {
+    #        'type' : (0, EV_KEY),
+    #        'code' : BTN_TOUCH,
+    #        'value' : lambda x: 0
+    #}
 
 

@@ -1,5 +1,5 @@
-from cinput import *
-from mapper import pretty_conf_print
+from uinputmapper.cinput import *
+from uinputmapper.mapper import pretty_conf_print
 
 
 """

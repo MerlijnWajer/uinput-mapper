@@ -1,4 +1,4 @@
-from cinput import *
+from uinputmapper.cinput import *
 
 
 """
