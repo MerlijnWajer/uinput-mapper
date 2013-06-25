@@ -122,6 +122,18 @@ class InputDevice(object):
         if hasattr(self, '_f'):
             os.close(self._f)
 
+    def grab(self):
+        """
+        Grab input device
+        """
+        fcntl.ioctl(self._f, EVIOCGRAB, 1)
+
+    def ungrab(self):
+        """
+        Release device
+        """
+        fcntl.ioctl(self._f, EVIOCGRAB, 0)
+
 
 def open_uinput():
     try:

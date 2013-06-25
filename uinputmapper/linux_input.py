@@ -164,8 +164,10 @@ EVIOCGABS = lambda _abs: IOR(ord('E'), 0x40 + _abs, ctypes.sizeof(input_absinfo)
 #EVIOCSFF		_IOC(_IOC_WRITE, 'E', 0x80, sizeof(struct ff_effect))	/* send a force effect to a force feedback device */
 #EVIOCRMFF		_IOW('E', 0x81, int)			/* Erase a force effect */
 #EVIOCGEFFECTS		_IOR('E', 0x84, int)			/* Report number of effects playable at the same time */
-#
-#EVIOCGRAB		_IOW('E', 0x90, int)			/* Grab/Release device */
+
+
+# Grab/Release device
+EVIOCGRAB = IOW(ord('E'), 0x90, 'i')
+
 #
 #EVIOCSCLOCKID		_IOW('E', 0xa0, int)			/* Set clockid to be used for timestamps */
-
