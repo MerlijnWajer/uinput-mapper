@@ -38,5 +38,6 @@ src_install() {
 
 	doexe input-read
 	doexe input-create
+	doexe input-replay
 }
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-import ctypes, fcntl, os, sys
+import ctypes, sys
 
 import uinputmapper
 import uinputmapper.linux_uinput
