@@ -22,18 +22,30 @@ parser.add_option('-D', '--dump', action='store_false',
         default=True, help='Dump will marshall all the events to stdout')
 parser.add_option('-v', '--verbose', action='store_true',
         default=False, help='Enable verbose mode (do not combine with -D)')
+parser.add_option('-G', '--grab', action='append',
+        type=str, default=[])
 
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
 
 args, input_file = parser.parse_args()
 
-if len(input_file) == 0:
+if len(input_file) + len(args.grab) == 0:
     parser.print_help()
     exit(0)
 
 # Open input devices
 fs = map(InputDevice, input_file)
+
+# Open devices in grab mode
+fsg = map(InputDevice, args.grab)
+
+# Grab devices
+for _ in fsg:
+    _.grab()
+
+# Combine grabbed and not-grabbed devices
+fs += fsg
 
 # Create configuration
 config = {}
