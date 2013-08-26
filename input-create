@@ -23,6 +23,8 @@ parser = optparse.OptionParser(description='Create input devices.',
         )
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
+parser.add_option('-S', '--sync', action='store_true',
+        help='Synchronise all events on an synchronise event')
 parser.add_option('-v', '--verbose', action='store_true',
         help='Enable verbose mode')
 
@@ -73,4 +75,9 @@ while True:
     idx, ev = m.map_event(ev, fd)
     d = ofs[idx]
 
-    d.fire_event(ev)
+    # Sync always to all devices?
+    if args.sync and ev.type == EV_SYN and ev.code == SYN_REPORT and ev.value == 0:
+        for fd in ofs:
+            fd.fire_event(ev)
+    else:
+        d.fire_event(ev)
