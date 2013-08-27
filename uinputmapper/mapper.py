@@ -93,10 +93,13 @@ class KeyMapper(object):
                 info = typemaps[ev.code]
                 ofd, ev.type = info['type']
                 ev.code = info['code']
-                if info['value'] is not None:
-                    ev.value = info['value'](ev.value)
+                if 'func' in info:
+                    info['func'](ev)
                 else:
-                    ev.value = ev.value
+                    if info['value'] is not None:
+                        ev.value = info['value'](ev.value)
+                    else:
+                        ev.value = ev.value
 
         return ofd, ev
 
