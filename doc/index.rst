@@ -6,14 +6,17 @@
 Welcome to uinput-mapper's documentation!
 =========================================
 
+
+.. uinput-mapper; twee delen: input-read,create, etc en de API voor programmers.
+
+
 Contents:
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   ioctlhelp
-   cinput
-   mapper
+   usage
+   api
 
 ..
    linux_input
