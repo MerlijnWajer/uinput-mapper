@@ -49,8 +49,10 @@ fs += fsg
 
 # Create configuration
 config = {}
+names = {}
 for idx, f in enumerate(fs):
     c = parse_conf(f, idx)
+    names[idx] = f.get_name()
 
     config.update(c)
 
@@ -82,6 +84,7 @@ else:
     p.dump(len(fs))
 
     p.dump(config)
+    p.dump(names)
 
     sys.stdout.flush()
 

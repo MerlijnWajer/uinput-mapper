@@ -4,7 +4,7 @@ import ctypes, sys
 import uinputmapper
 import uinputmapper.linux_uinput
 from uinputmapper.cinput import *
-from uinputmapper.mapper import KeyMapper, parse_conf, pretty_conf_print, \
+from uinputmapper.mapper import KeyMapper, pretty_conf_print, \
     get_exported_device_count
 from uinputmapper.linux_input import timeval, input_event
 
@@ -39,13 +39,16 @@ nifd = in_f.load()
 # Read configuration
 conf = in_f.load()
 
+# Read names
+names = in_f.load()
+
 if args.verbose:
     pretty_conf_print(conf)
 
 # Allow configurations to change our current configuration
 for path in cfg:
     config_merge = imp.load_source('', path).config_merge
-    config_merge(conf)
+    config_merge(conf, names)
 
 if args.verbose:
     pretty_conf_print(conf)
@@ -58,9 +61,10 @@ nofd = get_exported_device_count(conf)
 # Create and expose uinput devices
 ofs = []
 for f in xrange(nofd):
+    name = names[f]
     d = UInputDevice()
     m.expose(d, f)
-    d.setup('Example input device')
+    d.setup('UInputMapper: %s' % name)
     ofs.append(d)
 
 # Map events
