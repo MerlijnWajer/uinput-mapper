@@ -28,7 +28,12 @@ config = {
         }
 }
 
-def config_merge(c):
+names = {
+    0 : 'Example mouse',
+}
+
+def config_merge(c, n):
     del c[(0, EV_KEY)]
     del c[(0, EV_ABS)]
     c.update(config)
+    n.update(names)

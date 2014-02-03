@@ -10,6 +10,11 @@ config = {
         }
 }
 
-def config_merge(c):
+names = {
+    0 : 'Example mouse'
+}
+
+def config_merge(c, n):
     c.clear()
     c.update(config)
+    n.update(names)

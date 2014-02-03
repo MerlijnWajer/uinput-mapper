@@ -76,7 +76,12 @@ config = {
     }
 }
 
-def config_merge(c):
+names = {
+    0 : 'Joystick 0',
+    1 : 'Joystick 1',
+}
+
+def config_merge(c, n):
     pretty_conf_print(c)
     print '-' * 80
     c.clear()
@@ -85,3 +90,5 @@ def config_merge(c):
     c.update(config)
     print '-' * 80
     pretty_conf_print(c)
+
+    n.update(names)

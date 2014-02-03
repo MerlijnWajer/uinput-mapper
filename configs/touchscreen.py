@@ -57,13 +57,19 @@ config = {
         }
 }
 
-def config_merge(c):
+names = {
+    0 : 'Example touchscreen'
+}
+
+def config_merge(c, n):
     # XXX: We cannot just use update; as it will override everything in say EV_KEY
     for k, v in config.iteritems():
         if k in c:
             c[k].update(v)
         else:
             c[k] = v
+
+    n.update(names)
 
     # Uncomment this to make touch click too
     #c[(0, EV_KEY)][BTN_TOUCH] = {
