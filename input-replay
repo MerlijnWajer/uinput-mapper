@@ -43,6 +43,9 @@ nifd = in_f.load()
 # Read configuration
 conf = in_f.load()
 
+# Read names
+names = in_f.load()
+
 if args.verbose:
     pretty_conf_print(conf)
 
@@ -62,9 +65,10 @@ nofd = get_exported_device_count(conf)
 # Create and expose uinput devices
 ofs = []
 for f in xrange(nofd):
+    name = names[f]
     d = UInputDevice()
     m.expose(d, f)
-    d.setup('Example input device')
+    d.setup('UInputMapper: %s' % name)
     ofs.append(d)
 
 #start_time = time.time()
