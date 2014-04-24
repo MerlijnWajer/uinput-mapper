@@ -27,7 +27,22 @@ config = {
             'type' : (0, EV_KEY),
             'code' : KEY_A,
             'func' : keyswap
-        }
+        },
+        KEY_SPACE : {
+            'type' : (0, EV_KEY),
+            'code' : KEY_SPACE,
+            'value' : None
+        },
+        KEY_C : {
+            'type' : (0, EV_KEY),
+            'code' : KEY_C,
+            'value' : None
+        },
+        KEY_LEFTCTRL : {
+            'type' : (0, EV_KEY),
+            'code' : KEY_LEFTCTRL,
+            'value' : None
+        },
     }
 }
 
@@ -35,11 +50,16 @@ names = {
     0 : 'Example a-b keyboard'
 }
 
-extra_exports = [
-# TODO
+# Export extra keys. In our case: export KEY_B with type EV_KEY ; to ofd 0.
+# We need to add it here, because it isn't export in our config dictionary; but
+# it can be returned from the keyswap function. (and uinput wants to know what
+# keys are exported at creation time)
+extra_key_exports = [
+    (0, EV_KEY, KEY_B),
 ]
 
 def config_merge(c, n):
+    c.clear()
     n.update(names)
     for k, v in config.iteritems():
         if k in c:

@@ -39,6 +39,9 @@ nifd = in_f.load()
 # Read configuration
 conf = in_f.load()
 
+# Extra key exports, if defined in the configuration
+key_exp = []
+
 # Read names
 names = in_f.load()
 
@@ -50,8 +53,14 @@ for path in cfg:
     config_merge = imp.load_source('', path).config_merge
     config_merge(conf, names)
 
+    extra_key_exports = imp.load_source('', path).extra_key_exports
+    key_exp += extra_key_exports
+
 if args.verbose:
     pretty_conf_print(conf)
+    print 'Extra keys:'
+    for (ofd, t, code) in key_exp:
+        print rev_events[t], rev_event_keys[t][code]
 
 m = KeyMapper(conf)
 
@@ -63,7 +72,7 @@ ofs = []
 for f in xrange(nofd):
     name = names[f]
     d = UInputDevice()
-    m.expose(d, f)
+    m.expose(d, f, extra_keys=key_exp)
     d.setup('UInputMapper: %s' % name)
     ofs.append(d)
 

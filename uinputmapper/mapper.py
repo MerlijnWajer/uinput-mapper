@@ -108,7 +108,7 @@ class KeyMapper(object):
 
         return ofd, ev
 
-    def expose(self, d, fd):
+    def expose(self, d, fd, extra_keys=None):
         """
         Expose exposes events to a uinput-device *d* with index *fd* from the
         config passed to __init__.
@@ -125,3 +125,9 @@ class KeyMapper(object):
                     p = dat['prop']
                     d.set_absprop(dat['code'], _max=p['max'], _min=p['min'],
                             fuzz=p['fuzz'], flat=p['flat'])
+
+        for (ofd, t, code) in extra_keys:
+            if ofd != fd:
+                continue
+            d.expose_event_type(t)
+            d.expose_event(t, code)
