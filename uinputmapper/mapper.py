@@ -93,10 +93,18 @@ class KeyMapper(object):
                 info = typemaps[ev.code]
                 ofd, ev.type = info['type']
                 ev.code = info['code']
-                if info['value'] is not None:
-                    ev.value = info['value'](ev.value)
+
+                # If 'func' is defined, call the function, else, see if 'value'
+                # is a callable and call it. Otherwise, just pass along whatever
+                # value we recieved.
+                if 'func' in info:
+                    info['func'](ev)
                 else:
-                    ev.value = ev.value
+                    if info['value'] is not None:
+                        ev.value = info['value'](ev.value)
+                    else:
+                        # This is here mostly for clarity...
+                        ev.value = ev.value
 
         return ofd, ev
 
