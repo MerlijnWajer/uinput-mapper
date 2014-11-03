@@ -8,10 +8,7 @@ from uinputmapper.mapper import KeyMapper, pretty_conf_print, \
     get_exported_device_count
 from uinputmapper.linux_input import timeval, input_event
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from uinputmapper.marshall import Unpickler
 
 import imp
 import optparse
@@ -19,7 +16,7 @@ import optparse
 _usage = 'python create.py /path/to/config1 ... /path/to/configN'
 parser = optparse.OptionParser(description='Create input devices.',
         usage=_usage,
-        version='0.01'
+        version='0.03'
         )
 parser.add_option('-C', '--compat', action='store_true',
         help='Enable compatibility mode; for Python < 2.7')
@@ -31,7 +28,7 @@ parser.add_option('-v', '--verbose', action='store_true',
 args, cfg = parser.parse_args()
 
 # Unpickle from stdin ; currently this is the default and only way
-in_f = pickle.Unpickler(sys.stdin)
+in_f = Unpickler(sys.stdin, t='pickle')
 
 # Read input device count
 nifd = in_f.load()
@@ -69,12 +66,12 @@ for f in xrange(nofd):
 
 # Map events
 while True:
-    if not args.compat:
-        fd, ev = in_f.load()
-    else:
-        fd, ev_p = in_f.load()
-        ti = timeval(ev_p[0], ev_p[1])
-        ev = input_event(ti, ev_p[2], ev_p[3], ev_p[4])
+    #if not args.compat:
+    #    fd, ev = in_f.load()
+    #else:
+    fd, ev_p = in_f.load()
+    ti = timeval(ev_p[0], ev_p[1])
+    ev = input_event(ti, ev_p[2], ev_p[3], ev_p[4])
 
     idx, ev = m.map_event(ev, fd)
     d = ofs[idx]

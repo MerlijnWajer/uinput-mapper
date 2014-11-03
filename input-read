@@ -7,17 +7,14 @@ import uinputmapper.linux_uinput
 from uinputmapper.cinput import *
 from uinputmapper.mapper import KeyMapper, parse_conf, pretty_conf_print
 
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
+from uinputmapper.marshall import Pickler
 
 import optparse
 
 _usage = 'input-read /dev/input/event<0> ... /dev/input/event<N>'
 parser = optparse.OptionParser(description='Read input devices.',
         usage = _usage,
-        version='0.01')
+        version='0.03')
 parser.add_option('-D', '--dump', action='store_false',
         default=True, help='Dump will marshall all the events to stdout')
 parser.add_option('-v', '--verbose', action='store_true',
@@ -79,7 +76,7 @@ if args.dump:
 
 else:
     # Dump initial information over pickle to stdout
-    p = pickle.Pickler(sys.stdout)
+    p = Pickler(sys.stdout, t='pickle')
 
     p.dump(len(fs))
 
@@ -115,10 +112,10 @@ while True:
                pass
 
         else:
-            if not args.compat:
-                p.dump((i, ev))
-            else:
-                p.dump((i, (ev.time.tv_sec, ev.time.tv_usec,
-                    ev.type, ev.code, ev.value)))
+            #if not args.compat:
+            #    p.dump((i, ev))
+            #else:
+            p.dump((i, (ev.time.tv_sec, ev.time.tv_usec,
+                ev.type, ev.code, ev.value)))
 
             sys.stdout.flush()
